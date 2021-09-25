@@ -62,6 +62,10 @@ Solution Concept:
 
 The system will consist of a Web Application that will be used by the user and the corresponding API logic layer will be responsible for creating the database instances as well as getting the data requested by the user. Initially, the entire project will be done on an OpenStack based Cloud and then later can be expanded to accommodate other private clouds. The technology stack that will be used for implementation has not yet been finalized, however, we envision the final structure to be as given below.
 
+![alt text][figure 1]
+
+[figure 1]: https://github.com/libing-milly/cs6620_postgresql/blob/main/diagram.png "Logo Title Text 2"
+
 Figure 1 presents the conceptual design we have for PGSQL as a Service (PGSQLaaS) system. In the figure, the Web service and API solution we will build is running at the bottom two boxes and the upper side of the picture represents the PGSQL instances that are hosting the user databases. As an example, the primary DB1 database (DB1-P) lives on VM1 and a secondary replica of DB1 lives on VM2 (DB1-S). This way, if the VM1 goes down the DB1 data is still available in the PGSQL instance running on VM2. Users of PGSQLaaS interact with it either via the Web interfaces served from the Apache web servers or via API’s exposed on API VM1 and API VM2.
 
 
