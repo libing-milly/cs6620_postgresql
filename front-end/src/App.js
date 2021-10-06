@@ -1,9 +1,12 @@
 import './App.css';
+import LandingPage from './LandingPage';
 
 function App() {
+  
+
   return (
     <div className="App">
-      <h1>Postgres on Cloud</h1>
+      <LandingPage/>
     </div>
   );
 }
