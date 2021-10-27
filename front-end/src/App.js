@@ -9,12 +9,13 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <MyToolbar/>
+        
         <Switch>
           <Route exact path="/">
+            <MyToolbar/>
             <LandingPage/>
           </Route>
-          <Route path="db">
+          <Route path="/db">
             <DisplayDatabase/>
           </Route>
         </Switch>        

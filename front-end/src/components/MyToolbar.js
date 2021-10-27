@@ -8,6 +8,8 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 
 export default function MyToolbar() {
+  const [title, setTitle] = React.useState('Welcome');
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -22,7 +24,7 @@ export default function MyToolbar() {
             <MenuIcon />
           </IconButton>
           <Typography href="/" variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Welcome
+            {title}
           </Typography>
           <Button href="/" color="inherit">Home</Button>
         </Toolbar>

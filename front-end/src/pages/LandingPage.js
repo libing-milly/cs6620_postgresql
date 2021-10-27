@@ -15,6 +15,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import ClientService from '../services/service';
+import { BrowserRouter as Route, Redirect, useHistory} from 'react-router-dom';
+import DisplayDatabse from './DisplayDatabase'
+
 const theme = createTheme();
 
 const useStyles = makeStyles({
@@ -50,20 +53,37 @@ const useStyles = makeStyles({
 export default function LandingPage() {
   const [create_database, setCreate_database] = React.useState(false);
   const [access_database, setAccess_database] = React.useState(false);
+  const [can_access, setCan_access] = React.useState(false);
   const [db_name, setDb_name] = React.useState('db name');
   const [response, setResponse] = React.useState('enter database name');
+  const history = useHistory();
 
   const handleCreation = () => {
-    setResponse('creation request sent, db name' + db_name)
-  
-    ClientService.getInstance().testGet(db_name)
-    .then(res => setResponse(res))
-    .catch(setResponse('error'))
+    try{
+      setResponse('creation request sent, db name' + db_name) 
+      ClientService.getInstance().testGet(db_name)
+      .then(res => setResponse(res))
+      .catch(setResponse('error'))
+
+      history.push("/db")
+    }catch{
+      setResponse("failed to create a databse")
+    }
+    return; 
   
   }
+  
   const handleAccess = () => {
-    setResponse('access request sent, db name' + db_name )
+    try {
+      // TODO: axios request to server
+      setCan_access(true);
+      history.push("/db")
+    }catch{
+      setResponse("failed to access, try again.")
+    }
+    return;
   }
+
   const handleOpenCreateDatabase = () => {
     setCreate_database(true);
   };
@@ -146,7 +166,7 @@ export default function LandingPage() {
                 <DialogTitle>Access Database</DialogTitle>
                 <DialogContent>
                   <DialogContentText>
-                    Please enter your database name
+                    {response}
                   </DialogContentText>
                   <TextField
                     autoFocus
