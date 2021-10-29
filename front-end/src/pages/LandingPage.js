@@ -6,8 +6,6 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { makeStyles } from '@mui/styles';
-import PropTypes from 'prop-types';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -15,40 +13,14 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import ClientService from '../services/service';
-import { BrowserRouter as Route, Redirect, useHistory} from 'react-router-dom';
+import { BrowserRouter as Route, useHistory} from 'react-router-dom';
 import DisplayDatabse from './DisplayDatabase'
+import useDB from '../hooks/useDB';
+import MyButton from '../components/MyButton';
+import PropTypes from 'prop-types';
 
 const theme = createTheme();
 
-const useStyles = makeStyles({
-    root: {
-        border: 0,
-        borderRadius: 3,
-        color: 'white',
-        height: 48,
-        padding: '0 30px',
-      background: (props) =>
-        props.color === 'red'
-          ? 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)'
-          : 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-      boxShadow: (props) =>
-        props.color === 'red'
-          ? '0 3px 5px 2px rgba(255, 105, 135, .3)'
-          : '0 3px 5px 2px rgba(33, 203, 243, .3)',
-          
-      
-    },
-  });
-
-  function MyButton(props) {
-    const { color, ...other } = props;
-    const classes = useStyles(props);
-    return <Button className={classes.root} {...other} />;
-  }
-  
-  MyButton.propTypes = {
-    color: PropTypes.oneOf(['blue', 'red']).isRequired,
-  };
 
 export default function LandingPage() {
   const [create_database, setCreate_database] = React.useState(false);
@@ -58,13 +30,17 @@ export default function LandingPage() {
   const [response, setResponse] = React.useState('enter database name');
   const history = useHistory();
 
+  MyButton.propTypes = {
+    color: PropTypes.oneOf(['blue', 'red']).isRequired,
+  };
+
   const handleCreation = () => {
     try{
       setResponse('creation request sent, db name' + db_name) 
       ClientService.getInstance().testGet(db_name)
       .then(res => setResponse(res))
       .catch(setResponse('error'))
-
+      
       history.push("/db")
     }catch{
       setResponse("failed to create a databse")
