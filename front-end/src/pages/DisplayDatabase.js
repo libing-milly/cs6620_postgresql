@@ -17,6 +17,13 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { styled, useTheme } from '@mui/material/styles';
 import useDB from '../hooks/useDB';
+import ClientService from '../services/service';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -72,6 +79,10 @@ export default function DisplayDatabase() {
   const { data, loading, error } = useDB('');
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const [response,setResponse] = React.useState();
+  const [db_to_delete, setDb_to_delete] = React.useState('');
+  const [delete_database, setDelete_database] = React.useState(false);
+  
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -80,6 +91,30 @@ export default function DisplayDatabase() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  const handleOpenDeleteDatabase = () => {
+    setDelete_database(true);
+  };
+
+  const handleCloseDeleteDatabase = () => {
+    setDelete_database(false);
+  };
+
+  const handleDeleteDB = () => {
+    // TODO: check if db_to_delete match db name
+    try{
+      console.log('sending delete request '+db_to_delete)
+      setResponse('deletion request sent, db name' + db_to_delete) 
+      ClientService.getInstance().delete(db_to_delete)
+      .then(res => setResponse(res))
+      .catch(setResponse('error'))
+      
+    }catch{
+      setResponse("failed to create a databse:" + response)
+    }
+    return; 
+  
+  }
 
     return(
     <ThemeProvider theme={theme}>
@@ -129,10 +164,32 @@ export default function DisplayDatabase() {
               ))}
             </List>
             <Divider/>
-            <Button variant="contained" color='error' onClick={handleDeleteDB}>Delete Database</Button>
+            <Button variant="contained" color='error' onClick={handleOpenDeleteDatabase}>Delete Database</Button>
           </Box>
         </Drawer>
-      
+        <Dialog open={delete_database}
+               onClose={handleCloseDeleteDatabase}
+               fullWidth='md'
+               >
+                <DialogTitle>Delete Database</DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    {response}
+                  </DialogContentText>
+                  <TextField
+                    autoFocus
+                    id="delete name"
+                    variant="standard"
+                    fullWidth='md'
+                    onChange = {(e) => setDb_to_delete(e.target.value)}
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCloseDeleteDatabase}>Cancel</Button>
+                  <Button onClick={handleDeleteDB}>Delete</Button>
+                </DialogActions>
+              </Dialog>
+            
       {/* Footer */}
       <Box sx={{ bgcolor: 'background.paper', p: 6 }} component="footer">
         <Typography

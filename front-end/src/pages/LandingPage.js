@@ -37,7 +37,7 @@ export default function LandingPage() {
   const handleCreation = () => {
     try{
       setResponse('creation request sent, db name' + db_name) 
-      ClientService.getInstance().testGet(db_name)
+      ClientService.getInstance().create(db_name)
       .then(res => setResponse(res))
       .catch(setResponse('error'))
       
