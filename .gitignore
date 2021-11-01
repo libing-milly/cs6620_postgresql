@@ -1,5 +1,6 @@
-demo1-new.mp4
-demo_2.mov
+# demo videos
+*.mp4
+*.mov
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
