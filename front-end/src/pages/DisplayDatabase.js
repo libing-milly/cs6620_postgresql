@@ -24,25 +24,10 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    flexGrow: 1,
-    padding: theme.spacing(3),
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    marginLeft: `-${drawerWidth}px`,
-    ...(open && {
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      marginLeft: 0,
-    }),
-  }),
-);
+import { Name } from './LandingPage';
+import { Redirect } from 'react-router';
+import { AuthorizationContext } from '../contexts/AuthorizationContext';
+import { DBNameContext } from '../contexts/DBNameContext';
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -71,19 +56,18 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
-const handleDeleteDB = () => {
-
-}
-
 export default function DisplayDatabase() {
+  const {authorized} = React.useContext(AuthorizationContext)
   const { data, loading, error } = useDB('');
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [response,setResponse] = React.useState();
   const [db_to_delete, setDb_to_delete] = React.useState('');
   const [delete_database, setDelete_database] = React.useState(false);
-  
+  const {db_name, setDb_name} = React.useContext(DBNameContext);
 
+
+  
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -102,6 +86,10 @@ export default function DisplayDatabase() {
 
   const handleDeleteDB = () => {
     // TODO: check if db_to_delete match db name
+    if (db_to_delete !== db_name){
+      setResponse("please enter the correct name")
+      return;
+    }
     try{
       console.log('sending delete request '+db_to_delete)
       setResponse('deletion request sent, db name' + db_to_delete) 
@@ -115,7 +103,9 @@ export default function DisplayDatabase() {
     return; 
   
   }
-
+    if (!authorized) {
+      return <Redirect to="/"/>;
+    }
     return(
     <ThemeProvider theme={theme}>
         <CssBaseline />
@@ -130,10 +120,15 @@ export default function DisplayDatabase() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            {data} Databse Overview
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          Database Overview
           </Typography>
+          <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}>
+          {db_name}
+          </Typography>
+          <Button href="/" color="inherit">Home</Button>
         </Toolbar>
+        
       </AppBar>
       <Drawer
         sx={{
@@ -157,14 +152,16 @@ export default function DisplayDatabase() {
           <Toolbar />
           <Box sx={{ overflow: 'auto' }}>
             <List>
-              {['Usage', 'Statistics'].map((text, index) => (
+              {['Usage', 'Statistics','Settings'].map((text, index) => (
                 <ListItem button key={text}>
                   <ListItemText primary={text} />
                 </ListItem>
               ))}
             </List>
             <Divider/>
-            <Button variant="contained" color='error' onClick={handleOpenDeleteDatabase}>Delete Database</Button>
+            <List>
+              <Button variant="contained" color='error' onClick={handleOpenDeleteDatabase}>Delete Database</Button>
+            </List>
           </Box>
         </Drawer>
         <Dialog open={delete_database}
@@ -189,7 +186,9 @@ export default function DisplayDatabase() {
                   <Button onClick={handleDeleteDB}>Delete</Button>
                 </DialogActions>
               </Dialog>
-            
+
+
+
       {/* Footer */}
       <Box sx={{ bgcolor: 'background.paper', p: 6 }} component="footer">
         <Typography
@@ -198,7 +197,7 @@ export default function DisplayDatabase() {
           color="text.secondary"
           component="p"
         >
-          Footer
+          
         </Typography>
       </Box>
       {/* End footer */}

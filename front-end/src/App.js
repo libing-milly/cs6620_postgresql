@@ -2,24 +2,30 @@ import './App.css';
 import LandingPage from './pages/LandingPage';
 import { BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import DisplayDatabase from './pages/DisplayDatabase';
-import MyToolbar from './components/MyToolbar';
+import { AuthorizationContext } from './contexts/AuthorizationContext';
+import { useState } from 'react';
+import { DBNameContext } from './contexts/DBNameContext';
+
 function App() {
-  
+  const [authorized, setAuthorized] = useState(false);
+  const [db_name, setDb_name] = useState("");
 
   return (
     <Router>
-      <div className="App">
-        
+      <AuthorizationContext.Provider value={{authorized, setAuthorized}} className="App">
+      <DBNameContext.Provider value={{db_name, setDb_name}} className="App">
+
         <Switch>
           <Route exact path="/">
-            <MyToolbar/>
             <LandingPage/>
           </Route>
-          <Route path="/db">
-            <DisplayDatabase/>
+          <Route exact path="/db">
+              <DisplayDatabase />
           </Route>
-        </Switch>        
-      </div>
+          
+        </Switch>   
+        </DBNameContext.Provider>     
+      </AuthorizationContext.Provider>
     </Router>
     
   );

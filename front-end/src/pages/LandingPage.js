@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, {createContext, useContext} from 'react';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import Stack from '@mui/material/Stack';
@@ -14,19 +14,23 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import ClientService from '../services/service';
 import { BrowserRouter as Route, useHistory} from 'react-router-dom';
-import DisplayDatabse from './DisplayDatabase'
-import useDB from '../hooks/useDB';
+import MyToolbar from '../components/MyToolbar';
 import MyButton from '../components/MyButton';
 import PropTypes from 'prop-types';
+import DisplayDatabase from './DisplayDatabase';
+import { AuthorizationContext } from '../contexts/AuthorizationContext';
+import { DBNameContext } from '../contexts/DBNameContext';
 
 const theme = createTheme();
+const Name = createContext();
 
 
-export default function LandingPage() {
+function LandingPage() {
+  const {authorized, setAuthorized} = React.useContext(AuthorizationContext)
   const [create_database, setCreate_database] = React.useState(false);
   const [access_database, setAccess_database] = React.useState(false);
-  const [can_access, setCan_access] = React.useState(false);
-  const [db_name, setDb_name] = React.useState('db name');
+  const {db_name, setDb_name} = React.useContext(DBNameContext);
+  const [input, setInput] = React.useState("");
   const [response, setResponse] = React.useState('enter database name');
   const history = useHistory();
 
@@ -35,13 +39,16 @@ export default function LandingPage() {
   };
 
   const handleCreation = () => {
+    if (input.length === 0){
+      setResponse('please enter database name');
+      return;
+    }
     try{
-      setResponse('creation request sent, db name' + db_name) 
-      ClientService.getInstance().create(db_name)
+      ClientService.getInstance().create(input)
       .then(res => setResponse(res))
       .catch(setResponse('error'))
       
-      history.push("/db")
+      toDisplayDatabase();
     }catch{
       setResponse("failed to create a databse")
     }
@@ -50,14 +57,24 @@ export default function LandingPage() {
   }
   
   const handleAccess = () => {
+    if (input.length === 0){
+      setResponse('please enter database name');
+      return;
+    }
     try {
       // TODO: axios request to server
-      setCan_access(true);
-      history.push("/db")
+      toDisplayDatabase();
     }catch{
       setResponse("failed to access, try again.")
     }
     return;
+  }
+
+  const toDisplayDatabase = () => {
+    setAuthorized(true)
+    setDb_name(input)
+    history.push("/db")
+    
   }
 
   const handleOpenCreateDatabase = () => {
@@ -77,6 +94,8 @@ export default function LandingPage() {
   };
 
   return (
+    <div>
+    <MyToolbar title="Welcome"/>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <main>
@@ -93,8 +112,7 @@ export default function LandingPage() {
               component="h1"
               variant="h2"
               align="center"
-              color="text.primary"
-              
+              color="text.primary"         
               gutterBottom
             >
               PostgreSQL as a containerized service
@@ -126,7 +144,7 @@ export default function LandingPage() {
                     id="create name"
                     variant="standard"
                     fullWidth='md'
-                    onChange = {(e) => setDb_name(e.target.value)}
+                    onChange = {(e) => setInput(e.target.value)}
                   />
                 </DialogContent>
                 <DialogActions>
@@ -149,7 +167,7 @@ export default function LandingPage() {
                     id="access name"
                     variant="standard"
                     fullWidth='md'
-                    onChange = {(e) => setDb_name(e.target.value)}
+                    onChange = {(e) => setInput(e.target.value)}
                   />
                 </DialogContent>
                 <DialogActions>
@@ -177,5 +195,10 @@ export default function LandingPage() {
       </Box>
       {/* End footer */}
     </ThemeProvider>
+      
+    </div>
   );
 }
+
+export default LandingPage;
+export { Name };

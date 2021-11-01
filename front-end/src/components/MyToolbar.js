@@ -7,8 +7,8 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 
-export default function MyToolbar() {
-  const [title, setTitle] = React.useState('Welcome');
+export default function MyToolbar(props) {
+  const [title, setTitle] = React.useState(props.title);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
