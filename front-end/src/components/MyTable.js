@@ -28,16 +28,19 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     },
   }));
 
-const labels = ["datid", "datname", "numbackends", "xact_commit", 
-"xact_rollback", "blks_read", "blks_hit", "tup_returned", "tup_fetched", 
-"tup_inserted", "tup_updated", "tup_deleted" ,"conflicts", "temp_files", 
-"temp_bytes", "deadlocks", "checksum_failures","checksum_last_failure",
-"blk_read_time", "blk_write_time", "stats_reset"]
+const labels = ["Database oid", "Database name", "Number of backends/connections",
+ "Number of commits", "Number of rollback", "Number of disk blocks read", 
+ "Number of disk blocks hit", "Number of rows returned by queries", "Number of rows fetched by queries", 
+"Number of rows inserted by queries", "Number of rows updated by queries", 
+"Number of rows deleted by queries" ,"Number of queries canceled due to conflicts", 
+"Number of temporary files created by queries", "Total amount of data written to temporary files by queries", 
+"Number of deadlocks detected", "Checksum failures","Checksum last failure",
+"Time spent reading data file blocks by backends", "Time spent writing data file blocks by backends"]
 
 function reformateData(data) {
     var rows = [];
     var i;
-    for (i = 0; i < data.length; i++) {
+    for (i = 0; i < labels.length; i++) {
         rows.push({label: labels[i], data: data[i]})
     }
     return rows

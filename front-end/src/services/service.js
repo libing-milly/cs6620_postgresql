@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-const API_ROOT_REMOTE = 'http://128.31.27.249:5000/database/'
-const API_ROOT = 'http://localhost:5000/database/'
+const API_ROOT = 'http://128.31.27.249:5000/database/'
+const API_ROOT_L = 'http://localhost:5000/database/'
 const API_CREATE = 'createDatabase?dbname='
+const API_USER = "&uname="
 const API_DROP = "dropDatabase?dbname="
 const API_SIZE = 'getSize?dbname='
 const API_STATS = 'getStats?dbname='
@@ -17,8 +18,9 @@ export default class ClientService {
     return this.myInstance;
   }
   
-    static async create(db_name) {
-        var res = await axios.get(API_ROOT+API_CREATE+db_name).then(res => res.data);
+    static async create(db_name, user_name) {
+        console.log(API_ROOT+API_CREATE+db_name+API_USER+user_name)
+        var res = await axios.get(API_ROOT+API_CREATE+db_name+API_USER+user_name).then(res => res.data);
         console.log(res)
         return res
     }

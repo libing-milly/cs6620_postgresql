@@ -31,6 +31,8 @@ import { DBNameContext } from '../contexts/DBNameContext';
 import MyTable from '../components/MyTable';
 import { Stack } from '@mui/material';
 import { Container } from '@mui/material';
+import { ConnectionContext } from '../contexts/ConnectionContext';
+import MyModal from '../components/MyModal';
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -61,6 +63,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function DisplayDatabase() {
   const {authorized} = React.useContext(AuthorizationContext)
+  const {connection} = React.useContext(ConnectionContext)
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [response,setResponse] = React.useState();
@@ -69,7 +72,8 @@ export default function DisplayDatabase() {
   const {db_name, setDb_name} = React.useContext(DBNameContext);
   const [size, setSize] = React.useState("");
   const [stats, setStats] = React.useState("");
-  const [main_content, setMain_content] = React.useState("");
+
+  // const connection = "connection from display"
 
   const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
     ({ theme, open }) => ({
@@ -113,23 +117,20 @@ export default function DisplayDatabase() {
     }
     try{
       console.log('sending delete request '+db_to_delete)
-      setResponse('deletion request sent, db name' + db_to_delete) 
+      setResponse('delete request sent, db name' + db_to_delete) 
       ClientService.getInstance().delete(db_to_delete)
       .then(res => setResponse(res))
-      .catch(setResponse('error'))
       
     }catch{
-      setResponse("failed to create a databse:" + response)
+      setResponse("failed to delete a databse:" + response)
     }
     return; 
   
   }
-    
-    
+      
     const handleGetSize = () => {
       try{
         console.log('sending get size request '+db_name)
-        setResponse('get size request sent, db name' + db_name) 
         ClientService.getInstance().getSize(db_name)
         .then(res => setSize(res))
         .catch(setSize('error'))
@@ -141,6 +142,9 @@ export default function DisplayDatabase() {
     }
     
     const reformateStats = (str) => {
+      if(str === null || str.length === 0) {
+        return "";
+      }
       var res = str.slice(2,-2);
        res = res.split(",")
       return res
@@ -149,7 +153,6 @@ export default function DisplayDatabase() {
     const handleGetStats = () => {
       try{
         console.log('sending get stats request '+db_name)
-        setResponse('get stats request sent, db name' + db_name) 
         ClientService.getInstance().getStats(db_name)
         .then(res => setStats(reformateStats(res)))
         .catch(setStats('error'))
@@ -164,9 +167,11 @@ export default function DisplayDatabase() {
       if (!authorized) {
         return <Redirect to="/"/>;
       }
-      handleGetSize(db_name);
+      if (connection != null){
+
+      }
       handleGetStats(db_name);
-      setMain_content("Current database usage: " + size);
+      handleGetSize(db_name);
     },[authorized, db_name]);
 
 
@@ -217,16 +222,16 @@ export default function DisplayDatabase() {
         </DrawerHeader>
         <Divider />      
           
-            <List>
-              <ListItem button key='Usage'>
-                  <ListItemText primary='Usage' onClick={handleGetSize}/>
-                </ListItem>
-                <ListItem button key='Statistics'>
+            <List>        
+              <ListItem button key='Usage' onClick={handleGetSize}>
+                <MyModal name="Usage" title="Current Database Usage" body={size} /> 
+              </ListItem>
+              <ListItem button key='Statistics'>
                   <ListItemText primary='Statistics' onClick={handleGetStats}/>
                 </ListItem>
-                <ListItem button key='Settings'>
-                  <ListItemText primary='Settings' />
-                </ListItem>
+                <ListItem button key='Connection'>
+                <MyModal name="Connection" title="Connection Properties" body={connection} />                
+              </ListItem>
               
             </List>
             <Divider/>
@@ -238,9 +243,9 @@ export default function DisplayDatabase() {
         <Main open={open}>
         <DrawerHeader />
         <Typography variant="h4" gutterBottom component="div">
-          DataBase: {db_name} Size: {size}
+          Database Statistics
         </Typography>
-        <MyTable data={stats}/>
+        <MyTable data={stats} />
 
         </Main>
         <Dialog open={delete_database}

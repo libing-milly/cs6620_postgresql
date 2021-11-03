@@ -20,18 +20,21 @@ import PropTypes from 'prop-types';
 import DisplayDatabase from './DisplayDatabase';
 import { AuthorizationContext } from '../contexts/AuthorizationContext';
 import { DBNameContext } from '../contexts/DBNameContext';
+import { ConnectionContext } from '../contexts/ConnectionContext';
 
 const theme = createTheme();
 const Name = createContext();
 
 
 function LandingPage() {
-  const {authorized, setAuthorized} = React.useContext(AuthorizationContext)
+  const {setAuthorized} = React.useContext(AuthorizationContext)
+  const {connection, setConnection} = React.useContext(ConnectionContext)
   const [create_database, setCreate_database] = React.useState(false);
   const [access_database, setAccess_database] = React.useState(false);
-  const {db_name, setDb_name} = React.useContext(DBNameContext);
-  const [input, setInput] = React.useState("");
-  const [response, setResponse] = React.useState('enter database name');
+  const {setDb_name} = React.useContext(DBNameContext);
+  const [nameInput, setNameInput] = React.useState("");
+  const [userInput, setUserInput] = React.useState("");
+  const [response, setResponse] = React.useState('enter database name and user name');
   const history = useHistory();
 
   MyButton.propTypes = {
@@ -39,15 +42,18 @@ function LandingPage() {
   };
 
   const handleCreation = () => {
-    if (input.length === 0){
+    if (nameInput === null || userInput === null ||
+      userInput.length === 0 || nameInput.length === 0){
       setResponse('please enter database name');
       return;
     }
     try{
-      ClientService.getInstance().create(input)
-      .then(res => setResponse(res))
+      ClientService.getInstance().create(nameInput, userInput)
+      .then(res => setConnection("host:" + res.host + "\nport:" + res.port + 
+      "\nuser:" + res.username + "\npassword:" + res.password))
       .catch(setResponse('error'))
       
+      setResponse("database successfully created")
       toDisplayDatabase();
     }catch{
       setResponse("failed to create a databse")
@@ -57,7 +63,8 @@ function LandingPage() {
   }
   
   const handleAccess = () => {
-    if (input.length === 0){
+    if (nameInput === null ||
+       nameInput.length === 0){
       setResponse('please enter database name');
       return;
     }
@@ -72,7 +79,8 @@ function LandingPage() {
 
   const toDisplayDatabase = () => {
     setAuthorized(true)
-    setDb_name(input)
+    setDb_name(nameInput)
+    setConnection("")
     history.push("/db")
     
   }
@@ -144,7 +152,14 @@ function LandingPage() {
                     id="create name"
                     variant="standard"
                     fullWidth='md'
-                    onChange = {(e) => setInput(e.target.value)}
+                    onChange = {(e) => setNameInput(e.target.value)}
+                  />
+                  <TextField
+                    autoFocus
+                    id="create name"
+                    variant="standard"
+                    fullWidth='md'
+                    onChange = {(e) => setUserInput(e.target.value)}
                   />
                 </DialogContent>
                 <DialogActions>
@@ -160,14 +175,14 @@ function LandingPage() {
                 <DialogTitle>Access Database</DialogTitle>
                 <DialogContent>
                   <DialogContentText>
-                    {response}
+                    enter database name
                   </DialogContentText>
                   <TextField
                     autoFocus
                     id="access name"
                     variant="standard"
                     fullWidth='md'
-                    onChange = {(e) => setInput(e.target.value)}
+                    onChange = {(e) => setNameInput(e.target.value)}
                   />
                 </DialogContent>
                 <DialogActions>
