@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import MuiAppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -28,6 +28,9 @@ import { Name } from './LandingPage';
 import { Redirect } from 'react-router';
 import { AuthorizationContext } from '../contexts/AuthorizationContext';
 import { DBNameContext } from '../contexts/DBNameContext';
+import MyTable from '../components/MyTable';
+import { Stack } from '@mui/material';
+import { Container } from '@mui/material';
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -46,7 +49,7 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
-const drawerWidth = 200;
+const drawerWidth = 180;
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -58,16 +61,35 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function DisplayDatabase() {
   const {authorized} = React.useContext(AuthorizationContext)
-  const { data, loading, error } = useDB('');
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [response,setResponse] = React.useState();
   const [db_to_delete, setDb_to_delete] = React.useState('');
   const [delete_database, setDelete_database] = React.useState(false);
   const {db_name, setDb_name} = React.useContext(DBNameContext);
+  const [size, setSize] = React.useState("");
+  const [stats, setStats] = React.useState("");
+  const [main_content, setMain_content] = React.useState("");
 
+  const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
+    ({ theme, open }) => ({
+      flexGrow: 1,
+      padding: theme.spacing(3),
+      transition: theme.transitions.create('margin', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+      marginLeft: `-${drawerWidth}px`,
+      ...(open && {
+        transition: theme.transitions.create('margin', {
+          easing: theme.transitions.easing.easeOut,
+          duration: theme.transitions.duration.enteringScreen,
+        }),
+        marginLeft: 0,
+      }),
+    }),
+  );
 
-  
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -85,7 +107,6 @@ export default function DisplayDatabase() {
   };
 
   const handleDeleteDB = () => {
-    // TODO: check if db_to_delete match db name
     if (db_to_delete !== db_name){
       setResponse("please enter the correct name")
       return;
@@ -103,11 +124,54 @@ export default function DisplayDatabase() {
     return; 
   
   }
-    if (!authorized) {
-      return <Redirect to="/"/>;
+    
+    
+    const handleGetSize = () => {
+      try{
+        console.log('sending get size request '+db_name)
+        setResponse('get size request sent, db name' + db_name) 
+        ClientService.getInstance().getSize(db_name)
+        .then(res => setSize(res))
+        .catch(setSize('error'))
+        
+      }catch{
+        setSize("failed to retrieve size of databse:" + response)
+      }
+      return;  
     }
+    
+    const reformateStats = (str) => {
+      var res = str.slice(2,-2);
+       res = res.split(",")
+      return res
+    }
+
+    const handleGetStats = () => {
+      try{
+        console.log('sending get stats request '+db_name)
+        setResponse('get stats request sent, db name' + db_name) 
+        ClientService.getInstance().getStats(db_name)
+        .then(res => setStats(reformateStats(res)))
+        .catch(setStats('error'))
+        
+      }catch{
+        setStats("failed to retrieve stats of databse:" + response)
+      }
+      return;  
+    }
+
+    useEffect(() => {
+      if (!authorized) {
+        return <Redirect to="/"/>;
+      }
+      handleGetSize(db_name);
+      handleGetStats(db_name);
+      setMain_content("Current database usage: " + size);
+    },[authorized, db_name]);
+
+
     return(
-    <ThemeProvider theme={theme}>
+      <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         <AppBar position="fixed" open={open}>
         <Toolbar>
@@ -127,9 +191,11 @@ export default function DisplayDatabase() {
           {db_name}
           </Typography>
           <Button href="/" color="inherit">Home</Button>
+          
         </Toolbar>
         
       </AppBar>
+      
       <Drawer
         sx={{
           width: drawerWidth,
@@ -143,27 +209,40 @@ export default function DisplayDatabase() {
         anchor="left"
         open={open}
       >
+
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
         </DrawerHeader>
         <Divider />      
-          <Toolbar />
-          <Box sx={{ overflow: 'auto' }}>
+          
             <List>
-              {['Usage', 'Statistics','Settings'].map((text, index) => (
-                <ListItem button key={text}>
-                  <ListItemText primary={text} />
+              <ListItem button key='Usage'>
+                  <ListItemText primary='Usage' onClick={handleGetSize}/>
                 </ListItem>
-              ))}
+                <ListItem button key='Statistics'>
+                  <ListItemText primary='Statistics' onClick={handleGetStats}/>
+                </ListItem>
+                <ListItem button key='Settings'>
+                  <ListItemText primary='Settings' />
+                </ListItem>
+              
             </List>
             <Divider/>
             <List>
               <Button variant="contained" color='error' onClick={handleOpenDeleteDatabase}>Delete Database</Button>
             </List>
-          </Box>
+          
         </Drawer>
+        <Main open={open}>
+        <DrawerHeader />
+        <Typography variant="h4" gutterBottom component="div">
+          DataBase: {db_name} Size: {size}
+        </Typography>
+        <MyTable data={stats}/>
+
+        </Main>
         <Dialog open={delete_database}
                onClose={handleCloseDeleteDatabase}
                fullWidth='md'
@@ -186,20 +265,7 @@ export default function DisplayDatabase() {
                   <Button onClick={handleDeleteDB}>Delete</Button>
                 </DialogActions>
               </Dialog>
-
-
-
-      {/* Footer */}
-      <Box sx={{ bgcolor: 'background.paper', p: 6 }} component="footer">
-        <Typography
-          variant="subtitle1"
-          align="center"
-          color="text.secondary"
-          component="p"
-        >
-          
-        </Typography>
+                      
       </Box>
-      {/* End footer */}
-    </ThemeProvider>)
+    )
 }
