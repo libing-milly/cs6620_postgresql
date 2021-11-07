@@ -31,14 +31,20 @@ function LandingPage() {
   const {connection, setConnection} = React.useContext(ConnectionContext)
   const [create_database, setCreate_database] = React.useState(false);
   const [access_database, setAccess_database] = React.useState(false);
+  const [delete_database, setDelete_database] = React.useState(false);
   const {setDb_name} = React.useContext(DBNameContext);
   const [nameInput, setNameInput] = React.useState("");
   const [userInput, setUserInput] = React.useState("");
-  const [response, setResponse] = React.useState('enter database name and user name');
+  const [response, setResponse] = React.useState('');
+
+  const [deleteRes, setDeleteRes] = React.useState("Only database owener have the right to delete");
+  const [deleteDBNameInput, setDeleteDBNameInput] = React.useState("");
+  const [deleteUserInput, setDeleteUserInput] = React.useState("");
+  const [deletePswInput, setDeletePswInput] = React.useState("");
   const history = useHistory();
 
   MyButton.propTypes = {
-    color: PropTypes.oneOf(['blue', 'red']).isRequired,
+    color: PropTypes.oneOf(['blue', 'red','green']).isRequired,
   };
 
   const handleCreation = () => {
@@ -48,6 +54,7 @@ function LandingPage() {
       return;
     }
     try{
+      setResponse('sending request...')
       ClientService.getInstance().create(nameInput, userInput)
       .then(res => setConnection("host:" + res.host + "\nport:" + res.port + 
       "\nuser:" + res.username + "\npassword:" + res.password))
@@ -77,6 +84,25 @@ function LandingPage() {
     return;
   }
 
+
+  const handleDeletion = () => {
+    try{
+      setDeleteRes('sending request...')
+      // TODO: delete api need to take username and password
+      /*
+      ClientService.getInstance().delete(deleteDBNameInput)
+      .then(res => setDeleteRes.set(res))
+      .catch(setDeleteRes('error deleting'))
+      */
+      setDeleteRes("database successfully deleted")
+      
+    }catch{
+      setDeleteRes("failed to create a databse")
+    }
+    return; 
+  
+  }
+
   const toDisplayDatabase = () => {
     setAuthorized(true)
     setDb_name(nameInput)
@@ -100,6 +126,14 @@ function LandingPage() {
   const handleCloseAccessDatabase = () => {
     setAccess_database(false);
   };
+  const handleOpenDeleteDatabase = () => {
+    setDelete_database(true);
+  };
+
+  const handleCloseDeleteDatabase = () => {
+    setDelete_database(false);
+  };
+
 
   return (
     <div>
@@ -135,9 +169,10 @@ function LandingPage() {
               spacing={2}
               justifyContent="center"
             >
-              <MyButton color="blue" onClick={handleOpenAccessDatabase}>Access Database</MyButton>
-              <MyButton color="red" onClick={handleOpenCreateDatabase}>Create Database</MyButton>
-            </Stack>
+              <MyButton color="green" onClick={handleOpenAccessDatabase}>Access Database</MyButton>
+              <MyButton color="blue" onClick={handleOpenCreateDatabase}>Create Database</MyButton>
+              <MyButton color="red" onClick={handleOpenDeleteDatabase}>Delete Database</MyButton>
+              </Stack>
               <Dialog open={create_database} 
                 nClose={handleCloseCreateDatabase}
                 fullWidth='md'
@@ -148,17 +183,21 @@ function LandingPage() {
                     {response}
                   </DialogContentText>
                   <TextField
+                    required
                     autoFocus
-                    id="create name"
+                    id="create-db-name"
                     variant="standard"
                     fullWidth='md'
+                    label="database name required"
                     onChange = {(e) => setNameInput(e.target.value)}
                   />
                   <TextField
                     autoFocus
-                    id="create name"
+                    required
+                    id="create-username"
                     variant="standard"
                     fullWidth='md'
+                    label="user name required"
                     onChange = {(e) => setUserInput(e.target.value)}
                   />
                 </DialogContent>
@@ -174,12 +213,12 @@ function LandingPage() {
                >
                 <DialogTitle>Access Database</DialogTitle>
                 <DialogContent>
-                  <DialogContentText>
-                    enter database name
-                  </DialogContentText>
+              
                   <TextField
                     autoFocus
+                    required
                     id="access name"
+                    label="database name required"
                     variant="standard"
                     fullWidth='md'
                     onChange = {(e) => setNameInput(e.target.value)}
@@ -190,7 +229,52 @@ function LandingPage() {
                   <Button onClick={handleAccess}>Access</Button>
                 </DialogActions>
               </Dialog>
-            
+
+              <Dialog open={delete_database}
+               onClose={handleCloseDeleteDatabase}
+               fullWidth='md'
+               >
+              <DialogTitle>Delete Database</DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    {deleteRes}
+                  </DialogContentText>
+                  <TextField
+                    autoFocus
+                    required
+                    id="delete-db-name"
+                    label="database name required"
+                    variant="standard"
+                    fullWidth='md'
+                    onChange = {(e) => setDeleteDBNameInput(e.target.value)}
+                  />
+                  <TextField
+                    autoFocus
+                    required
+                    id="delete-username"
+                    label="username required"
+                    variant="standard"
+                    fullWidth='md'
+                    onChange = {(e) => setDeleteUserInput(e.target.value)}
+                  />
+                  <TextField
+                    autoFocus
+                    required
+                    type="password"
+                    id="delete-password"
+                    label="password requried"
+                    variant="standard"
+                    fullWidth='md'
+                    onChange={(e) => setDeletePswInput(e.target.value)}
+                  />
+                  
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCloseDeleteDatabase}>Cancel</Button>
+                  <Button onClick={handleDeletion}>Delete</Button>
+                </DialogActions>
+              </Dialog>
+
           </Container>
         </Box>
         <Container sx={{ py: 8 }} maxWidth="md">
