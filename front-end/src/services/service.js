@@ -1,12 +1,17 @@
 import axios from 'axios';
 
-const API_ROOT = 'http://128.31.27.249:5000/database/'
+
+const API_ROOT_R = 'http://128.31.27.249:5000/database/'
 const API_ROOT_L = 'http://localhost:5000/database/'
+const API_ROOT = API_ROOT_R
 const API_CREATE = 'createDatabase?dbname='
-const API_USER = "&uname="
+const API_ACCESS = 'accessDB?dbname='
 const API_DROP = "dropDatabase?dbname="
+const API_DROP_BY_OWNER= "dropDatabaseByOwner?dbname="
 const API_SIZE = 'getSize?dbname='
 const API_STATS = 'getStats?dbname='
+const API_USER = "&uname="
+const API_PWD = "&pwd="
 
 export default class ClientService {
     static myInstance = ClientService;
@@ -18,6 +23,12 @@ export default class ClientService {
     return this.myInstance;
   }
   
+  static async access(db_name, user_name, pwd) {
+    console.log(API_ROOT+API_CREATE+db_name+API_USER+user_name)
+    var res = await axios.get(API_ROOT+API_ACCESS+db_name+API_USER+user_name+API_PWD+pwd).then(res => res.data);
+    console.log(res)
+    return res
+}
     static async create(db_name, user_name) {
         console.log(API_ROOT+API_CREATE+db_name+API_USER+user_name)
         var res = await axios.get(API_ROOT+API_CREATE+db_name+API_USER+user_name).then(res => res.data);
@@ -25,9 +36,9 @@ export default class ClientService {
         return res
     }
 
-    static async delete(db_name) {
-      console.log('deleting '+db_name)
-      var res = await axios.get(API_ROOT+API_DROP+db_name).then(res => res.data);
+    static async delete(db_name, user_name, pwd) {
+      console.log('deleting '+db_name + ' for user' + user_name + ' with psw: ' + pwd)
+      var res = await axios.get(API_ROOT+API_DROP_BY_OWNER+db_name+API_USER+user_name+API_PWD+pwd).then(res => res.data);
       console.log(res)
       return res
   }

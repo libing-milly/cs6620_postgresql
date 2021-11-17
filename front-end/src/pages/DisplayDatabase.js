@@ -16,7 +16,6 @@ import Divider from '@mui/material/Divider';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { styled, useTheme } from '@mui/material/styles';
-import useDB from '../hooks/useDB';
 import ClientService from '../services/service';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
@@ -33,6 +32,7 @@ import { Stack } from '@mui/material';
 import { Container } from '@mui/material';
 import { ConnectionContext } from '../contexts/ConnectionContext';
 import MyModal from '../components/MyModal';
+import MyPgAdmin from '../components/MyPgAdmin';
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -67,11 +67,13 @@ export default function DisplayDatabase() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [response,setResponse] = React.useState();
-  const [db_to_delete, setDb_to_delete] = React.useState('');
-  const [delete_database, setDelete_database] = React.useState(false);
   const {db_name, setDb_name} = React.useContext(DBNameContext);
   const [size, setSize] = React.useState("");
   const [stats, setStats] = React.useState("");
+  const [statsVisible, setStatsVisible] = React.useState('hidden');
+  const [statsDisplay, setStatsDisplay] = React.useState('none');
+  const [pgAdminDisplay, setPgAdminDisplay] = React.useState('none');
+  const [pgAdminVisible, setPgAdminVisible] = React.useState('hidden');
 
   // const connection = "connection from display"
 
@@ -101,34 +103,8 @@ export default function DisplayDatabase() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
-
-  const handleOpenDeleteDatabase = () => {
-    setDelete_database(true);
-  };
-
-  const handleCloseDeleteDatabase = () => {
-    setDelete_database(false);
-  };
-
-  const handleDeleteDB = () => {
-    if (db_to_delete !== db_name){
-      setResponse("please enter the correct name")
-      return;
-    }
-    try{
-      console.log('sending delete request '+db_to_delete)
-      setResponse('delete request sent, db name' + db_to_delete) 
-      ClientService.getInstance().delete(db_to_delete)
-      .then(res => setResponse(res))
       
-    }catch{
-      setResponse("failed to delete a databse:" + response)
-    }
-    return; 
-  
-  }
-      
-    const handleGetSize = () => {
+  const handleGetSize = () => {
       try{
         console.log('sending get size request '+db_name)
         ClientService.getInstance().getSize(db_name)
@@ -151,6 +127,10 @@ export default function DisplayDatabase() {
     }
 
     const handleGetStats = () => {
+      setStatsVisible('visible')
+      setStatsDisplay('block')
+      setPgAdminDisplay('none')
+      setPgAdminVisible('hidden')
       try{
         console.log('sending get stats request '+db_name)
         ClientService.getInstance().getStats(db_name)
@@ -159,6 +139,20 @@ export default function DisplayDatabase() {
         
       }catch{
         setStats("failed to retrieve stats of databse:" + response)
+      }
+      return;  
+    }
+
+    const handleOpenPGAdmin = () => {
+      setStatsVisible('hidden')
+      setStatsDisplay('none')
+      setPgAdminDisplay('block')
+      setPgAdminVisible('visible')
+      try{
+        console.log('showing pgadmin web console')
+        
+      }catch{
+        setStats("failed to show pgadmin web console")
       }
       return;  
     }
@@ -220,57 +214,36 @@ export default function DisplayDatabase() {
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
         </DrawerHeader>
-        <Divider />      
-          
-            <List>        
-              <ListItem button key='Usage' onClick={handleGetSize}>
-                <MyModal name="Usage" title="Current Database Usage" body={size} /> 
-              </ListItem>
-              <ListItem button key='Statistics'>
-                  <ListItemText primary='Statistics' onClick={handleGetStats}/>
-                </ListItem>
-                <ListItem button key='Connection'>
-                <MyModal name="Connection" title="Connection Properties" body={connection} />                
-              </ListItem>
-              
-            </List>
-            <Divider/>
-            <List>
-              <Button variant="contained" color='error' onClick={handleOpenDeleteDatabase}>Delete Database</Button>
-            </List>
+        <Divider />         
+          <List>        
+            <ListItem button key='Usage' onClick={handleGetSize}>
+              <MyModal name="Usage" title="Current Database Usage" body={size} /> 
+            </ListItem>
+            <ListItem button key='Statistics'>
+              <ListItemText primary='Statistics' onClick={handleGetStats}/>
+            </ListItem>
+            <ListItem button key='Connection'>
+              <MyModal name="Connection" title="Connection Properties" body={connection} />                
+            </ListItem>
+            <ListItem button key="pgadmin">
+              <ListItemText primary="pgadmin" onClick={handleOpenPGAdmin} />    
+            </ListItem>
+            
+          </List>
+            
           
         </Drawer>
         <Main open={open}>
         <DrawerHeader />
-        <Typography variant="h4" gutterBottom component="div">
-          Database Statistics
-        </Typography>
-        <MyTable data={stats} />
+        
+        <Box component="div">     
+          <MyTable data={stats} visibility={statsVisible} display={statsDisplay}/>
+          <MyPgAdmin visibility={pgAdminVisible} display={pgAdminDisplay} username="user 1"/>
+        </Box>
+        
 
         </Main>
-        <Dialog open={delete_database}
-               onClose={handleCloseDeleteDatabase}
-               fullWidth='md'
-               >
-                <DialogTitle>Delete Database</DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
-                    {response}
-                  </DialogContentText>
-                  <TextField
-                    autoFocus
-                    id="delete name"
-                    variant="standard"
-                    fullWidth='md'
-                    onChange = {(e) => setDb_to_delete(e.target.value)}
-                  />
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseDeleteDatabase}>Cancel</Button>
-                  <Button onClick={handleDeleteDB}>Delete</Button>
-                </DialogActions>
-              </Dialog>
-                      
+        
       </Box>
     )
 }

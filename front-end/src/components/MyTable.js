@@ -7,6 +7,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -46,11 +47,14 @@ function reformateData(data) {
     return rows
 }
 
-export default function MyTable({data}) {
-    console.log("in my table, ", data.length)
-    const rows = reformateData(data);
+export default function MyTable(props) {
+    console.log("in my table, ", props.data.length)
+    const rows = reformateData(props.data);
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{ visibility: props.visibility, display: props.display}}>
+        <Typography variant="h4" gutterBottom component="div">
+          Database Statistics
+        </Typography>
       <Table sx={{ minWidth: 650 }} aria-label="customized table">
         <TableHead>
           <TableRow>

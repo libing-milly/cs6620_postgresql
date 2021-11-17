@@ -33,14 +33,19 @@ function LandingPage() {
   const [access_database, setAccess_database] = React.useState(false);
   const [delete_database, setDelete_database] = React.useState(false);
   const {setDb_name} = React.useContext(DBNameContext);
-  const [nameInput, setNameInput] = React.useState("");
-  const [userInput, setUserInput] = React.useState("");
+  const [createDBNameInput, setCreateDBNameInput] = React.useState("");
+  const [createUserInput, setCreateUserInput] = React.useState("");
   const [response, setResponse] = React.useState('');
 
   const [deleteRes, setDeleteRes] = React.useState("Only database owener have the right to delete");
   const [deleteDBNameInput, setDeleteDBNameInput] = React.useState("");
   const [deleteUserInput, setDeleteUserInput] = React.useState("");
   const [deletePswInput, setDeletePswInput] = React.useState("");
+
+  const [accessDBNameInput, setAccessDBNameInput] = React.useState("");
+  const [accessUserInput, setAccessUserInput] = React.useState("");
+  const [accessPwdInput, setAccessPwdInput] = React.useState("");
+
   const history = useHistory();
 
   MyButton.propTypes = {
@@ -48,20 +53,20 @@ function LandingPage() {
   };
 
   const handleCreation = () => {
-    if (nameInput === null || userInput === null ||
-      userInput.length === 0 || nameInput.length === 0){
+    if (createDBNameInput === null || createUserInput === null ||
+      createUserInput.length === 0 || createUserInput.length === 0){
       setResponse('please enter database name');
       return;
     }
     try{
       setResponse('sending request...')
-      ClientService.getInstance().create(nameInput, userInput)
+      ClientService.getInstance().create(createDBNameInput, createUserInput)
       .then(res => setConnection("host:" + res.host + "\nport:" + res.port + 
       "\nuser:" + res.username + "\npassword:" + res.password))
       .catch(setResponse('error'))
       
       setResponse("database successfully created")
-      toDisplayDatabase();
+      toDisplayDatabase(createDBNameInput);
     }catch{
       setResponse("failed to create a databse")
     }
@@ -70,42 +75,40 @@ function LandingPage() {
   }
   
   const handleAccess = () => {
-    if (nameInput === null ||
-       nameInput.length === 0){
-      setResponse('please enter database name');
+    if (accessDBNameInput === null || accessDBNameInput.length === 0 || 
+      accessUserInput == null || accessUserInput.length === 0 || 
+      accessPwdInput == null || accessPwdInput.length === 0){
+      setResponse('please enter database name and credentials');
       return;
     }
-    try {
-      // TODO: axios request to server
-      toDisplayDatabase();
-    }catch{
-      setResponse("failed to access, try again.")
-    }
+    ClientService.getInstance().access(accessDBNameInput, accessUserInput, accessPwdInput)
+      .then(res => {if (res.res !== "success"){
+        setResponse(res.res)
+        return;
+      }else{
+        setConnection("host:" + res.host + "\nport:" + res.port + 
+      "\nuser:" + res.username + "\npassword:" + res.password)
+      toDisplayDatabase(accessDBNameInput)
+      }})
+      .catch(e => setResponse('error: ' + e))
+      
     return;
   }
 
 
   const handleDeletion = () => {
-    try{
-      setDeleteRes('sending request...')
-      // TODO: delete api need to take username and password
-      /*
-      ClientService.getInstance().delete(deleteDBNameInput)
-      .then(res => setDeleteRes.set(res))
-      .catch(setDeleteRes('error deleting'))
-      */
-      setDeleteRes("database successfully deleted")
-      
-    }catch{
-      setDeleteRes("failed to create a databse")
-    }
+    setDeleteRes('sending request...')
+    ClientService.getInstance().delete(deleteDBNameInput, deleteUserInput, deletePswInput)
+    .then(res => setDeleteRes(res))
+    .catch(setDeleteRes('error deleting'))    
+  
     return; 
   
   }
 
-  const toDisplayDatabase = () => {
+  const toDisplayDatabase = (dbname) => {
     setAuthorized(true)
-    setDb_name(nameInput)
+    setDb_name(dbname)
     setConnection("")
     history.push("/db")
     
@@ -116,6 +119,7 @@ function LandingPage() {
   };
 
   const handleCloseCreateDatabase = () => {
+    setResponse("")
     setCreate_database(false);
   };
 
@@ -124,6 +128,7 @@ function LandingPage() {
   };
 
   const handleCloseAccessDatabase = () => {
+    setResponse("")
     setAccess_database(false);
   };
   const handleOpenDeleteDatabase = () => {
@@ -131,6 +136,7 @@ function LandingPage() {
   };
 
   const handleCloseDeleteDatabase = () => {
+    setDeleteRes("")
     setDelete_database(false);
   };
 
@@ -189,7 +195,7 @@ function LandingPage() {
                     variant="standard"
                     fullWidth='md'
                     label="database name required"
-                    onChange = {(e) => setNameInput(e.target.value)}
+                    onChange = {(e) => setCreateDBNameInput(e.target.value)}
                   />
                   <TextField
                     autoFocus
@@ -198,7 +204,7 @@ function LandingPage() {
                     variant="standard"
                     fullWidth='md'
                     label="user name required"
-                    onChange = {(e) => setUserInput(e.target.value)}
+                    onChange = {(e) => setCreateUserInput(e.target.value)}
                   />
                 </DialogContent>
                 <DialogActions>
@@ -213,15 +219,35 @@ function LandingPage() {
                >
                 <DialogTitle>Access Database</DialogTitle>
                 <DialogContent>
-              
+                <DialogContentText>
+                    {response}
+                </DialogContentText>
                   <TextField
                     autoFocus
                     required
-                    id="access name"
+                    id="access-dbname"
                     label="database name required"
                     variant="standard"
                     fullWidth='md'
-                    onChange = {(e) => setNameInput(e.target.value)}
+                    onChange = {(e) => setAccessDBNameInput(e.target.value)}
+                  />
+                  <TextField
+                    autoFocus
+                    required
+                    id="access-username"
+                    label="username required"
+                    variant="standard"
+                    fullWidth='md'
+                    onChange = {(e) => setAccessUserInput(e.target.value)}
+                  />
+                  <TextField
+                    autoFocus
+                    required
+                    id="access-password"
+                    label="password required"
+                    variant="standard"
+                    fullWidth='md'
+                    onChange = {(e) => setAccessPwdInput(e.target.value)}
                   />
                 </DialogContent>
                 <DialogActions>
@@ -260,13 +286,13 @@ function LandingPage() {
                   <TextField
                     autoFocus
                     required
-                    type="password"
                     id="delete-password"
-                    label="password requried"
+                    label="password required"
                     variant="standard"
                     fullWidth='md'
-                    onChange={(e) => setDeletePswInput(e.target.value)}
+                    onChange = {(e) => setDeletePswInput(e.target.value)}
                   />
+                  
                   
                 </DialogContent>
                 <DialogActions>
