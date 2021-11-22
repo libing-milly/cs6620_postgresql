@@ -1,70 +1,77 @@
-# Getting Started with Create React App
+# PostgreSQL as a (containerized) service
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+## Vision and Goals Of The Project:
 
-In the project directory, you can run:
+PostgreSQL is an object-relational database system that is robust and reliable. The vision of this project is to build a fault-tolerant, containerized PostgreSQL as a service solution.
 
-### `npm start`
+The key goals of this project include:
+ 
+* Building various APIs that can create, delete and modify PostgreSQL databases that are stored on various containers. 
+* Developing websites for the users to easily monitor and manage their databases through the APIs we built. 
+* Developing websites for the system administrator to manage and view the meta-data of the PostgreSQL instances. 
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Users/Personas Of The Project:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+There are 2 types of user roles of this project: the user of the databases, and the system administrator. 
 
-### `npm test`
+| Database Users | System Administrator |
+|----------------|----------------------|
+| 1. As a database user, I want to store my data on a remote server that is fault tolerant, so that it is easy to scale up and down, and if one server is down, my data will not be lost.| 1. As a system administrator, I want to be able to create or delete a PGSQL instance if I need to.|
+| 2. As a database user, I want to be able to conveniently manage my database through a website, including: changing my password, changing the capacity of a database, deleting a database etc. | 2. As a system administrator, I want to be able to read the real-time usage of all the PGSQL instances on the virtual machines, so that I can have a better understanding of the utilization of all the PGSQL instances.|
+| 3. As a database user, I want to be able to monitor my database usage and conveniently have a report generated for me about the various metrics of my databases. | 3. As a system administrator, I want to be able to conveniently view the statistics or meta data of the PGSQL instances in the system.|
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
+## Scope and Features Of The Project:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The project covers the build and deployment of a Web Application with an API implementation using which the user will be able to create PostgreSQL instances on different VMs and spin-up new databases as required. The below features can be considered as in scope for the project implementation:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+* Create a Web-Application that the user will be able to interact with and perform various operations.
+* Creation of various APIs for the purpose of :
+* Creation of new databases on the existing PostgreSQL instances. This should also create a backup database that shadows the primary database on another PostgreSQL instance.
+* Delete existing PostgreSQL database instances
+* List existing PostgreSQL instances.
+* Get PostgreSQL instance information.
+* Change a PostgreSQL Instance's Settings.
+* List databases running on a specific PostgreSQL instance.
+* Get information about a PostgreSQL database.
+* Create a database on an existing instance.
+* Change settings of an existing database. 
+* Change parameters of the existing databases
+* Generate reporting metrics regarding the resource utilization, database health and database usage.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Stretch Goals (to be implemented if time permits)
 
-### `npm run eject`
+* Expand the API service to function across multiple clouds (e.g. a private OpenStack cloud and Google Cloud)
+* Build a service that can run PostgreSQL VM instances as well as container instances. 
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Solution Concept:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+The system will consist of a Web Application that will be used by the user and the corresponding API logic layer will be responsible for creating the database instances as well as getting the data requested by the user. Initially, the entire project will be done on an OpenStack based Cloud and then later can be expanded to accommodate other private clouds. The technology stack that will be used for implementation has not yet been finalized, however, we envision the final structure to be as given below.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+![alt text][figure 1]
 
-## Learn More
+[figure 1]: https://github.com/libing-milly/cs6620_postgresql/blob/main/diagram.png "Logo Title Text 2"
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Figure 1 presents the conceptual design we have for PGSQL as a Service (PGSQLaaS) system. In the figure, the Web service and API solution we will build is running at the bottom two boxes and the upper side of the picture represents the PGSQL instances that are hosting the user databases. As an example, the primary DB1 database (DB1-P) lives on VM1 and a secondary replica of DB1 lives on VM2 (DB1-S). This way, if the VM1 goes down the DB1 data is still available in the PGSQL instance running on VM2. Users of PGSQLaaS interact with it either via the Web interfaces served from the Apache web servers or via API’s exposed on API VM1 and API VM2.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Code Splitting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Acceptance criteria:
+*  Our web application supports basic functions such as creating, deleting, listing, and updating a PostgreSQL and existing database, for both the database user and the system administrator.
 
-### Analyzing the Bundle Size
+## Release Planning:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+We will attempt to deliver our project in the following stages:
 
-### Making a Progressive Web App
+1. A simple website and the corresponding APIs for the user to create and delete a PostgreSQL database on a container.
+2. A more comprehensive website with functions including viewing the meta information on current databases, updating the parameters of databases.
+3. A website and the corresponding APIs for the system administrator to monitor the state of the PostgreSQL instances.
+The stretch goals if time permits.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
-### Advanced Configuration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Resources Needed:
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+We will be testing and deploying our application on the MassOpen Cloud and hence we would be requiring these accesses to start with our development. If we decide to carry out our stretch assignment, then we would also need access to a public cloud such as Google Cloud.
