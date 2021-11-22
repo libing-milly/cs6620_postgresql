@@ -1,12 +1,12 @@
 import axios from 'axios';
 
+// const API_ROOT_R1 = 'http://128.31.27.249:5000/database/'
+const API_ROOT_VM001 = 'http://128.31.26.151:5000/database/'
+// const API_ROOT_L = 'http://localhost:5000/database/'
 
-const API_ROOT_R = 'http://128.31.27.249:5000/database/'
-const API_ROOT_L = 'http://localhost:5000/database/'
-const API_ROOT = API_ROOT_R
+const API_ROOT = API_ROOT_VM001;
 const API_CREATE = 'createDatabase?dbname='
 const API_ACCESS = 'accessDB?dbname='
-const API_DROP = "dropDatabase?dbname="
 const API_DROP_BY_OWNER= "dropDatabaseByOwner?dbname="
 const API_SIZE = 'getSize?dbname='
 const API_STATS = 'getStats?dbname='

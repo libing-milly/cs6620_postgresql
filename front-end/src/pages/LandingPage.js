@@ -1,4 +1,4 @@
-import React, {createContext, useContext} from 'react';
+import React, {createContext} from 'react';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import Stack from '@mui/material/Stack';
@@ -17,7 +17,6 @@ import { BrowserRouter as Route, useHistory} from 'react-router-dom';
 import MyToolbar from '../components/MyToolbar';
 import MyButton from '../components/MyButton';
 import PropTypes from 'prop-types';
-import DisplayDatabase from './DisplayDatabase';
 import { AuthorizationContext } from '../contexts/AuthorizationContext';
 import { DBNameContext } from '../contexts/DBNameContext';
 import { ConnectionContext } from '../contexts/ConnectionContext';
@@ -28,7 +27,7 @@ const Name = createContext();
 
 function LandingPage() {
   const {setAuthorized} = React.useContext(AuthorizationContext)
-  const {connection, setConnection} = React.useContext(ConnectionContext)
+  const {setConnection} = React.useContext(ConnectionContext)
   const [create_database, setCreate_database] = React.useState(false);
   const [access_database, setAccess_database] = React.useState(false);
   const [delete_database, setDelete_database] = React.useState(false);
