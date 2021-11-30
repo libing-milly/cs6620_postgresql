@@ -31,6 +31,8 @@ function LandingPage() {
   const [create_database, setCreate_database] = React.useState(false);
   const [access_database, setAccess_database] = React.useState(false);
   const [delete_database, setDelete_database] = React.useState(false);
+  const [openDeletePrompt, setOpenDeletePrompt] = React.useState(false);
+
   const {setDb_name} = React.useContext(DBNameContext);
   const [createDBNameInput, setCreateDBNameInput] = React.useState("");
   const [createUserInput, setCreateUserInput] = React.useState("");
@@ -96,6 +98,7 @@ function LandingPage() {
 
 
   const handleDeletion = () => {
+    setOpenDeletePrompt(false);
     setDeleteRes('sending request...')
     ClientService.getInstance().delete(deleteDBNameInput, deleteUserInput, deletePswInput)
     .then(res => setDeleteRes(res))
@@ -137,6 +140,13 @@ function LandingPage() {
   const handleCloseDeleteDatabase = () => {
     setDeleteRes("")
     setDelete_database(false);
+  };
+  const handleOpenDeletePrompt = () => {
+    setOpenDeletePrompt(true);
+  };
+
+  const handleCloseDeletePrompt = () => {
+    setOpenDeletePrompt(false);
   };
 
 
@@ -296,7 +306,28 @@ function LandingPage() {
                 </DialogContent>
                 <DialogActions>
                   <Button onClick={handleCloseDeleteDatabase}>Cancel</Button>
+                  <Button onClick={handleOpenDeletePrompt}>Delete</Button>
+                </DialogActions>
+              </Dialog>
+              <Dialog
+                open={openDeletePrompt}
+                onClose={handleCloseDeletePrompt}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+              >
+                <DialogTitle id="alert-dialog-title">
+                  {"Delete a Database"}
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-dialog-description">
+                    Are you sure you want to delete the database?
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
                   <Button onClick={handleDeletion}>Delete</Button>
+                  <Button onClick={handleCloseDeletePrompt} autoFocus>
+                    Cancle
+                  </Button>
                 </DialogActions>
               </Dialog>
 
