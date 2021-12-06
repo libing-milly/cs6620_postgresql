@@ -16,8 +16,10 @@ const useStyles = makeStyles({
             return 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)'
           case 'blue':
             return 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)'
-          default:
+          case 'green':
             return 'linear-gradient(45deg, #20bf55 30%, #80ff72 90%)'
+          default:
+            return 'linear-gradient(45deg, #f2be06 30%, #f0e619 90%)'
         }
         },
 
@@ -26,8 +28,10 @@ const useStyles = makeStyles({
           return '0 3px 5px 2px rgba(255, 105, 135, .3)'
         case 'blue':
           return '0 3px 5px 2px rgba(33, 203, 243, .3)'
-        default:
+        case 'green':
           return '0 3px 5px 2px rgba(100, 200, 200, .3)'
+        default:
+          return '0 3px 5px 2px rgba(240, 230, 25, .3)'
       }}
         
     },

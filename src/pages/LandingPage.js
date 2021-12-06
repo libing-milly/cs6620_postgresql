@@ -30,6 +30,7 @@ function LandingPage() {
   const {setConnection} = React.useContext(ConnectionContext)
   const [create_database, setCreate_database] = React.useState(false);
   const [access_database, setAccess_database] = React.useState(false);
+  const [request_access_database, setRequest_access_database] = React.useState(false);
   const [delete_database, setDelete_database] = React.useState(false);
   const [openDeletePrompt, setOpenDeletePrompt] = React.useState(false);
 
@@ -46,6 +47,9 @@ function LandingPage() {
   const [accessDBNameInput, setAccessDBNameInput] = React.useState("");
   const [accessUserInput, setAccessUserInput] = React.useState("");
   const [accessPwdInput, setAccessPwdInput] = React.useState("");
+
+  const [requestAccessDBNameInput, setRequestAccessDBNameInput] = React.useState("");
+  const [requestAccessUserInput, setRequestAccessUserInput] = React.useState("");
 
   const history = useHistory();
 
@@ -96,6 +100,25 @@ function LandingPage() {
     return;
   }
 
+  const handleRequestAccess = () => {
+    if (requestAccessDBNameInput === null || requestAccessDBNameInput.length === 0 || 
+      requestAccessUserInput == null || requestAccessUserInput.length === 0){
+      setResponse('please enter database name and username');
+      return;
+    }
+    setResponse("sending request....")
+    ClientService.getInstance().request_access(requestAccessDBNameInput, requestAccessUserInput)
+      .then(res => {if (res.host == null){
+        setResponse("Error")
+        return;
+      }else{
+        setConnection("host:" + res.host + "\nport:" + res.port + 
+      "\nuser:" + res.username + "\npassword:" + res.password)
+      toDisplayDatabase(requestAccessDBNameInput)
+      }})
+      .catch(e => setResponse('error: ' + e)) 
+    return;
+  }
 
   const handleDeletion = () => {
     setOpenDeletePrompt(false);
@@ -132,6 +155,14 @@ function LandingPage() {
   const handleCloseAccessDatabase = () => {
     setResponse("")
     setAccess_database(false);
+  };
+  const handleOpenRequestAccessDatabase = () => {
+    setRequest_access_database(true);
+  };
+
+  const handleCloseRequestAccessDatabase = () => {
+    setResponse("")
+    setRequest_access_database(false);
   };
   const handleOpenDeleteDatabase = () => {
     setDelete_database(true);
@@ -184,6 +215,7 @@ function LandingPage() {
               spacing={2}
               justifyContent="center"
             >
+              <MyButton color="yellow" onClick={handleOpenRequestAccessDatabase}>Request Access</MyButton>
               <MyButton color="green" onClick={handleOpenAccessDatabase}>Access Database</MyButton>
               <MyButton color="blue" onClick={handleOpenCreateDatabase}>Create Database</MyButton>
               <MyButton color="red" onClick={handleOpenDeleteDatabase}>Delete Database</MyButton>
@@ -265,6 +297,41 @@ function LandingPage() {
                 </DialogActions>
               </Dialog>
 
+              <Dialog open={request_access_database}
+               onClose={handleCloseRequestAccessDatabase}
+               fullWidth='md'
+               >
+                <DialogTitle>Request Database Access</DialogTitle>
+                <DialogContent>
+                <DialogContentText>
+                    {response}
+                </DialogContentText>
+                  <TextField
+                    autoFocus
+                    required
+                    id="request-access-dbname"
+                    label="database name required"
+                    variant="standard"
+                    fullWidth='md'
+                    onChange = {(e) => setRequestAccessDBNameInput(e.target.value)}
+                  />
+                  <TextField
+                    autoFocus
+                    required
+                    id="request-access-username"
+                    label="username required"
+                    variant="standard"
+                    fullWidth='md'
+                    onChange = {(e) => setRequestAccessUserInput(e.target.value)}
+                  />
+                  
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCloseRequestAccessDatabase}>Cancel</Button>
+                  <Button onClick={handleRequestAccess}>Request Access</Button>
+                </DialogActions>
+              </Dialog>
+
               <Dialog open={delete_database}
                onClose={handleCloseDeleteDatabase}
                fullWidth='md'
@@ -316,7 +383,7 @@ function LandingPage() {
                 aria-describedby="alert-dialog-description"
               >
                 <DialogTitle id="alert-dialog-title">
-                  {"Delete a Database"}
+                  {"Delete Database"}
                 </DialogTitle>
                 <DialogContent>
                   <DialogContentText id="alert-dialog-description">
