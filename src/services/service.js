@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const API_VM = 'http://128.31.25.198:5000/database/database/'
+// const API_VM = 'http://128.31.25.198:5000/database/database/'
 // const API_ROOT_L = 'http://localhost:5000/database/'
 
-const API_ROOT = API_VM;
+const API_ROOT = process.env.REACT_APP_BASE_API;
 const API_CREATE = 'createDatabase'
 const API_ACCESS = 'accessDB'
 const API_DROP_BY_OWNER= "dropDatabaseByOwner"
