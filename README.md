@@ -71,7 +71,19 @@ We will attempt to deliver our project in the following stages:
 The stretch goals if time permits.
 
 
+## Developer Guide:
 
-## Resources Needed:
+There are 4 components in this project, the frontend, the backend server, the central repository and the configuration of postgres server. In the following sections we will explain the steps needed to configure and run each component.
 
-We will be testing and deploying our application on the MassOpen Cloud and hence we would be requiring these accesses to start with our development. If we decide to carry out our stretch assignment, then we would also need access to a public cloud such as Google Cloud.
+### Configuration of postgres server
+
+First step of running this project is to set up the primary and secondary postgres servers:
+
+### Backend Server and Central Repository
+
+Please see the code and set up instructions of the backend server and the central repository in(https://github.com/amadgi/postgres_server)
+
+### Running Frontend Locally
+
+To run the frontend locally, Create a file named `.env` in the root directory with the line `REACT_APP_API_BASE=`, followed with the address of where your server is deployed, for example `REACT_APP_API_BASE='http://localhost:8080'`.
+After the `.env` file is created, run the `npm start` command(you will need to run the `npm install` the very first time). Moments later, a browser will automatically open with the frontend running on it.
