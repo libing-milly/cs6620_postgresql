@@ -109,8 +109,7 @@ Edit the postgresql.conf：
 
 `$ sudo vi /var/lib/pgsql/13/data/postgresql.conf`
 
-Change the 'listen_addresses = *'
-`listen_addresses = '*'`
+Change the `listen_addresses = '*'`
 
 Edit the pg_hba.conf:
 
@@ -119,14 +118,20 @@ Edit the pg_hba.conf:
 Add:
 
 `# Accept from anywhere (not recommended)
+
 host all all 0.0.0.0/0 md5`
 
 `# Accept from trusted subnet (Recommended setting)
+
 host all all 192.168.18.0/24 md5`
 
 Restart postgresql
 
 `sudo systemctl restart postgresql-13`
+
+#### Step 5: Install repmgr 
+
+`yum -y  install repmgr13*`
 
 ### Backend Server and Central Repository
 
