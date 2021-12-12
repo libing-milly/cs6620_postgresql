@@ -79,6 +79,43 @@ There are 4 components in this project, the frontend, the backend server, the ce
 
 First step of running this project is to set up the primary and secondary postgres servers:
 
+#### Step 1: Install PostgreSQL 13 on CentOS 8 
+
+`sudo dnf install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm`
+
+`sudo dnf -qy module disable postgresql`
+
+`$ sudo dnf repolist`
+
+`$ sudo yum search postgresql13`
+
+`sudo dnf install postgresql13 postgresql13-server`
+
+#### Step 2: Initialize and start database service
+
+`$ sudo /usr/pgsql-13/bin/postgresql-13-setup initdb`
+
+`$ sudo systemctl enable --now postgresql-13`
+
+#### Step 3: Set PostgreSQL admin user’s password
+
+`$ sudo su - postgres `
+
+`$ psql -c "alter user postgres with password 'postgres'"`
+
+#### Step 4: Enabling remote Database connections
+
+`$ sudo vi /var/lib/pgsql/13/data/postgresql.conf`, `listen_addresses = '*'`
+
+`$ sudo vi /var/lib/pgsql/13/data/pg_hba.conf`, 
+`# Accept from anywhere (not recommended)
+host all all 0.0.0.0/0 md5
+
+# Accept from trusted subnet (Recommended setting)
+host all all 192.168.18.0/24 md5`
+
+`sudo systemctl restart postgresql-13`
+
 ### Backend Server and Central Repository
 
 Please see the code and set up instructions of the backend server and the central repository in(https://github.com/amadgi/postgres_server)
