@@ -166,11 +166,15 @@ Edit these parameters
 `$ sudo vi /var/lib/pgsql/13/data/pg_hba.conf`, 
 
 `local   replication     repmgr                              trust
+
 host    replication     repmgr      127.0.0.1/32            trust
+
 host    replication     repmgr      16.0.0.0/16             trust
 
 local   repmgr          repmgr                              trust
+
 host    repmgr          repmgr      127.0.0.1/32            trust
+
 host    repmgr          repmgr      16.0.0.0/16             trust`
 
 ### Backend Server and Central Repository
