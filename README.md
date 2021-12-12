@@ -277,7 +277,7 @@ So far we have done the setting of primary and standby servers configuration now
 
 Modify these parameters:
 
-`vrrp_script keepalived_check {
+```vrrp_script keepalived_check {
 
       script "/usr/local/bin/keepalived_check.sh"
       
@@ -288,7 +288,7 @@ Modify these parameters:
       rise 3
       
       fall 3
-}`
+}```
 
 `vrrp_instance VI_1 {
 
