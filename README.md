@@ -105,14 +105,26 @@ First step of running this project is to set up the primary and secondary postgr
 
 #### Step 4: Enabling remote Database connections
 
-`$ sudo vi /var/lib/pgsql/13/data/postgresql.conf`, `listen_addresses = '*'`
+Edit the postgresql.conf：
+
+`$ sudo vi /var/lib/pgsql/13/data/postgresql.conf`
+
+Change the 'listen_addresses = *'
+`listen_addresses = '*'`
+
+Edit the pg_hba.conf:
 
 `$ sudo vi /var/lib/pgsql/13/data/pg_hba.conf`, 
+
+Add:
+
 `# Accept from anywhere (not recommended)
 host all all 0.0.0.0/0 md5`
 
 `# Accept from trusted subnet (Recommended setting)
 host all all 192.168.18.0/24 md5`
+
+Restart postgresql
 
 `sudo systemctl restart postgresql-13`
 
