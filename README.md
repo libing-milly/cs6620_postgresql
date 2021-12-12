@@ -272,6 +272,8 @@ Check the failing primary server status and our standby server is running as a p
 
 To check more informantion on the document of repmgr(https://repmgr.org/docs/current/index.html)
 
+
+
 So far we have done the setting of primary and standby servers configuration now. But we have to set up the Keepalived's configuration for failing-over an IP address from one machine to another before we move to the next stage. Here are steps for configurating the Keepalived:
 
 #### Step 1: yum install -y keepalived on both servers
