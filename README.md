@@ -165,17 +165,89 @@ Edit these parameters
 
 `$ sudo vi /var/lib/pgsql/13/data/pg_hba.conf`, 
 
+Add these lines above the regular setting:
+
 `local   replication     repmgr                              trust
 
 host    replication     repmgr      127.0.0.1/32            trust
 
-host    replication     repmgr      16.0.0.0/16             trust
+host    replication     repmgr      10.0.0.0/16             trust
 
 local   repmgr          repmgr                              trust
 
 host    repmgr          repmgr      127.0.0.1/32            trust
 
-host    repmgr          repmgr      16.0.0.0/16             trust`
+host    repmgr          repmgr      10.0.0.0/16             trust`
+
+#### Step 9: Re-configure pg_hba.conf on primary server
+
+`$ sudo vi /var/lib/pgsql/repmgr.conf`
+
+`cluster='failovertest'
+
+node_id=1
+
+node_name=node1
+
+conninfo='host=10.0.0.220 user=repmgr dbname=repmgr connect_timeout=2'
+
+data_directory='/var/lib/pgsql/13/data/'
+
+failover=automatic
+
+promote_command='/usr/pgsql-13/bin/repmgr standby promote -f /var/lib/pgsql/repmgr.conf --log-to-file'
+
+follow_command='/usr/pgsql-13/bin/repmgr standby follow -f /var/lib/pgsql/repmgr.conf --log-to-file --upstream-node-id=%n'`
+
+#### Step 9: Register the primary server and check status
+
+`/usr/pgsql-13/bin/repmgr -f /var/lib/pgsql/repmgr.conf primary register`
+
+Check our primary servers status:
+
+`/usr/pgsql-13/bin/repmgr -f /var/lib/pgsql/repmgr.conf cluster show`
+
+Restart the Postgresql service 
+
+`# systemctl restart postgresql-13.service`
+
+#### Step 10: Build/clone the standby server on standby server
+
+`$ sudo vi /var/lib/pgsql/repmgr.conf`
+
+`node_id=2
+
+node_name=node2
+
+conninfo='host=10.0.0.17 user=repmgr dbname=repmgr connect_timeout=2'
+
+data_directory='/var/lib/pgsql/13/data'
+
+failover=automatic
+
+promote_command='/usr/pgsql-13/bin/repmgr standby promote -f /var/lib/pgsql/repmgr.conf --log-to-file'
+
+follow_command='/usr/pgsql-13/bin/repmgr standby follow -f /var/lib/pgsql/repmgr.conf --log-to-file --upstream-node-id=%n'`
+
+Clone the standby server from our primary server: (Or have a `--dry-run` to check if we met requirements)
+
+`/usr/pgsql-13/bin/repmgr -h 10.0.0.220 -U repmgr -d repmgr -f /var/lib/pgsql/repmgr.conf standby clone`
+
+#### Step 11: Register the standby server and check status
+
+`/usr/pgsql-13/bin/repmgr -f /var/lib/pgsql/repmgr.conf standby register`
+
+Check our primary and standby servers status:
+
+`/usr/pgsql-13/bin/repmgr -f /var/lib/pgsql/repmgr.conf cluster show`
+
+#### Step 12: Start repmgrd daemon process on both servers
+
+`/usr/pgsql-13/bin/repmgr  -f /var/lib/pgsql/repmgr.conf daemon start`
+
+Check cluster events:
+
+`/usr/pgsql-13/bin/repmgr -f /var/lib/pgsql/repmgr.conf cluster event --event=repmgrd_start`
 
 ### Backend Server and Central Repository
 
