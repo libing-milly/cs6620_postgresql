@@ -77,7 +77,7 @@ There are 4 components in this project, the frontend, the backend server, the ce
 
 ### Configuration of postgres server
 
-First step of running this project is to set up the primary and secondary postgres servers on two different VMs:
+* First step of running this project is to set up the primary and secondary postgres servers on two different VMs:
 
 #### Step 1: Install PostgreSQL 13 on CentOS 8 on both servers
 
@@ -274,7 +274,7 @@ To check more informantion on the document of repmgr(https://repmgr.org/docs/cur
 
 
 
-So far we have done the setting of primary and standby servers configuration now. But we have to set up the Keepalived's configuration for failing-over an IP address from one machine to another before we move to the next stage. Here are steps for configurating the Keepalived:
+* So far we have done the setting of primary and standby servers configuration now. But we have to set up the Keepalived's configuration for failing-over an IP address from one machine to another before we move to the next stage. Here are steps for configurating the Keepalived:
 
 #### Step 1: yum install -y keepalived on both servers
 
