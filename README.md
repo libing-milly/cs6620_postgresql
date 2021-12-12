@@ -109,9 +109,9 @@ First step of running this project is to set up the primary and secondary postgr
 
 `$ sudo vi /var/lib/pgsql/13/data/pg_hba.conf`, 
 `# Accept from anywhere (not recommended)
-host all all 0.0.0.0/0 md5
+host all all 0.0.0.0/0 md5`
 
-# Accept from trusted subnet (Recommended setting)
+`# Accept from trusted subnet (Recommended setting)
 host all all 192.168.18.0/24 md5`
 
 `sudo systemctl restart postgresql-13`
