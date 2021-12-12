@@ -199,7 +199,7 @@ promote_command='/usr/pgsql-13/bin/repmgr standby promote -f /var/lib/pgsql/repm
 
 follow_command='/usr/pgsql-13/bin/repmgr standby follow -f /var/lib/pgsql/repmgr.conf --log-to-file --upstream-node-id=%n'`
 
-#### Step 9: Register the primary server and check status
+#### Step 10: Register the primary server and check status
 
 `/usr/pgsql-13/bin/repmgr -f /var/lib/pgsql/repmgr.conf primary register`
 
@@ -211,7 +211,7 @@ Restart the Postgresql service
 
 `# systemctl restart postgresql-13.service`
 
-#### Step 10: Build/clone the standby server on standby server
+#### Step 11: Build/clone the standby server on standby server
 
 `$ sudo vi /var/lib/pgsql/repmgr.conf`
 
@@ -233,7 +233,11 @@ Clone the standby server from our primary server: (Or have a `--dry-run` to chec
 
 `/usr/pgsql-13/bin/repmgr -h 10.0.0.220 -U repmgr -d repmgr -f /var/lib/pgsql/repmgr.conf standby clone`
 
-#### Step 11: Register the standby server and check status
+#### Step 12: Register the standby server and check status
+
+`# systemctl start postgresql-13.service`
+
+`# systemctl enable postgresql-13.service`
 
 `/usr/pgsql-13/bin/repmgr -f /var/lib/pgsql/repmgr.conf standby register`
 
@@ -241,13 +245,95 @@ Check our primary and standby servers status:
 
 `/usr/pgsql-13/bin/repmgr -f /var/lib/pgsql/repmgr.conf cluster show`
 
-#### Step 12: Start repmgrd daemon process on both servers
+#### Step 13: Start repmgrd daemon process on both servers
 
 `/usr/pgsql-13/bin/repmgr  -f /var/lib/pgsql/repmgr.conf daemon start`
 
 Check cluster events:
 
 `/usr/pgsql-13/bin/repmgr -f /var/lib/pgsql/repmgr.conf cluster event --event=repmgrd_start`
+
+#### Step 14: Simulating a Failed Primary (Optional: it will need more opertaions to convert the failed primary back online as a healthy primary server)
+
+`# systemctl stop postgresql-13.service`
+
+Check the failing primary server status and our standby server is running as a primary server now:
+
+`/usr/pgsql-13/bin/repmgr -f /var/lib/pgsql/repmgr.conf cluster show`
+
+`/usr/pgsql-13/bin/repmgr -f /var/lib/pgsql/repmgr.conf cluster event`
+
+To check more informantion on the document of repmgr(https://repmgr.org/docs/current/index.html)
+
+So far we have done the setting of primary and standby servers configuration now. But we have to set up the Keepalived's configuration for failing-over an IP address from one machine to another before we move to the next stage. Here are steps for configurating the Keepalived:
+
+#### Step 1: yum install -y keepalived on both servers
+
+`# yum install keepalived`
+
+#### Step 2: Configurate keepalived on primary server
+
+`$ sudo vi /etc/keepalived/keepalived.conf`
+
+Modify these parameters:
+
+`vrrp_script keepalived_check {
+      script "/usr/local/bin/keepalived_check.sh"
+      interval 1
+      timeout 5
+      rise 3
+      fall 3
+}`
+
+`vrrp_instance VI_1 {
+      state MASTER
+      interface eth0
+      virtual_router_id 51
+      priority 101
+      advert_int 1
+      authentication {
+         auth_type PASS
+         auth_pass 12345
+      }
+      virtual_ipaddress {
+         10.0.0.100
+      }
+      track_process {
+         keepalived_check
+      }
+}`
+
+#### Step 3: Configurate keepalived on standby server
+
+`vrrp_script keepalived_check {
+      script "/usr/local/bin/keepalived_check.sh"
+      interval 1
+      timeout 5
+      rise 3
+      fall 3
+}`
+
+`vrrp_instance VI_1 {
+    state BACKUP
+    interface eth0
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        10.0.0.100
+    }
+    track_process {
+         keepalived_check
+      }
+}`
+
+#### Step 4: Check IP address on both servers
+
+`ip -brief address show`
 
 ### Backend Server and Central Repository
 
