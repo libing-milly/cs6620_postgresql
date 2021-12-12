@@ -278,27 +278,42 @@ So far we have done the setting of primary and standby servers configuration now
 Modify these parameters:
 
 `vrrp_script keepalived_check {
+
       script "/usr/local/bin/keepalived_check.sh"
+      
       interval 1
+      
       timeout 5
+      
       rise 3
+      
       fall 3
 }`
 
 `vrrp_instance VI_1 {
+
       state MASTER
+      
       interface eth0
+      
       virtual_router_id 51
+      
       priority 101
+      
       advert_int 1
+      
       authentication {
+      
          auth_type PASS
+         
          auth_pass 12345
       }
       virtual_ipaddress {
+      
          10.0.0.100
       }
       track_process {
+      
          keepalived_check
       }
 }`
@@ -306,27 +321,42 @@ Modify these parameters:
 #### Step 3: Configurate keepalived on standby server
 
 `vrrp_script keepalived_check {
+
       script "/usr/local/bin/keepalived_check.sh"
+      
       interval 1
+      
       timeout 5
+      
       rise 3
+      
       fall 3
 }`
 
 `vrrp_instance VI_1 {
+
     state BACKUP
+    
     interface eth0
+    
     virtual_router_id 51
+    
     priority 100
+    
     advert_int 1
+    
     authentication {
+    
         auth_type PASS
+        
         auth_pass 1111
     }
     virtual_ipaddress {
+    
         10.0.0.100
     }
     track_process {
+    
          keepalived_check
       }
 }`
