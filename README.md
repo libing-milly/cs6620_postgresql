@@ -77,9 +77,9 @@ There are 4 components in this project, the frontend, the backend server, the ce
 
 ### Configuration of postgres server
 
-First step of running this project is to set up the primary and secondary postgres servers:
+First step of running this project is to set up the primary and secondary postgres servers on two different VMs:
 
-#### Step 1: Install PostgreSQL 13 on CentOS 8 
+#### Step 1: Install PostgreSQL 13 on CentOS 8 on both servers
 
 `sudo dnf install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm`
 
@@ -91,19 +91,19 @@ First step of running this project is to set up the primary and secondary postgr
 
 `sudo dnf install postgresql13 postgresql13-server`
 
-#### Step 2: Initialize and start database service
+#### Step 2: Initialize and start database service on both servers
 
 `$ sudo /usr/pgsql-13/bin/postgresql-13-setup initdb`
 
 `$ sudo systemctl enable --now postgresql-13`
 
-#### Step 3: Set PostgreSQL admin user’s password
+#### Step 3: Set PostgreSQL admin user’s password on both servers
 
 `$ sudo su - postgres `
 
 `$ psql -c "alter user postgres with password 'postgres'"`
 
-#### Step 4: Enabling remote Database connections
+#### Step 4: Enabling remote Database connections on both servers
 
 Edit the postgresql.conf：
 
@@ -129,9 +129,49 @@ Restart postgresql
 
 `sudo systemctl restart postgresql-13`
 
-#### Step 5: Install repmgr 
+#### Step 5: Install repmgr on both servers
 
 `yum -y  install repmgr13*`
+
+#### Step 6: Re-configure on primary server
+
+`sudo vi /var/lib/pgsql/13/data/postgresql.conf`
+
+Edit these parameters
+
+`listen_addresses = '*' `
+
+`max_wal_senders = 10`
+
+`max_replication_slots = 10`
+
+`wal_level = 'replica'`
+
+`hot_standby = on`
+
+`archive_mode = on`
+
+`archive_command = '/bin/true'`
+
+`shared_preload_libraries = 'repmgr'`
+
+#### Step 7: Create super users on primary server's Postgresql
+
+`$ createuser --superuser repmgr`
+
+`$ createdb --owner=repmgr repmgr`
+
+#### Step 8: Re-configure pg_hba.conf on primary server
+
+`$ sudo vi /var/lib/pgsql/13/data/pg_hba.conf`, 
+
+`local   replication     repmgr                              trust`
+`host    replication     repmgr      127.0.0.1/32            trust`
+`host    replication     repmgr      16.0.0.0/16             trust`
+
+`local   repmgr          repmgr                              trust`
+`host    repmgr          repmgr      127.0.0.1/32            trust`
+`host    repmgr          repmgr      16.0.0.0/16             trust`
 
 ### Backend Server and Central Repository
 
