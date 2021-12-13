@@ -25,13 +25,17 @@ Database Users
 
 The project covers the build and deployment of a Web Application with an API implementation using which the user will be able to create PostgreSQL instances on different VMs and spin-up new databases as required. The below features can be considered as in scope for the project implementation:
 
-* Create a Web-Application that the user will be able to interact with and perform various operations.
-* Creation of various APIs for the purpose of :
-* Creation of new databases on the existing PostgreSQL instances. This should also create a backup database that shadows the primary database on another PostgreSQL instance.
-* Delete existing PostgreSQL database.
-* Get information about a PostgreSQL database.
-* Change settings of an existing database. 
-* Generate reporting metrics regarding the database health and database usage.
+- Create a Web-Application that the user will be able to interact with and perform various operations.
+- Creation of various APIs for the purpose of :
+ - Creation of new databases on the existing PostgreSQL instances. This should also create a backup database that shadows the primary database on another PostgreSQL instance.
+ - Delete existing PostgreSQL database.
+ - Get information about a PostgreSQL database.
+ - Change settings of an existing database. 
+ - Generate reporting metrics regarding the database health and database usage.
+
+Stretch Goals: 
+* Provide Client Authentication over SSL.
+* Expand the API service to function across multiple clouds (e.g. a private OpenStack cloud and Google Cloud).
 
 
 ## Solution Concept:
@@ -42,6 +46,7 @@ The system will consist of a Web Application that will be used by the user and t
 The technology stack that we used for implementation are as follows:
 * Frontend: React.js
 * Backend: Flask
+* PostgreSQL Database Adapter: Psycopg
 * Auto Postgres Fail Over Management Tool: Repmgr, Keepalived
 * API Testing: Swagger API
 
@@ -63,7 +68,7 @@ The user can either calls the APIs directly or through the web application we de
 
 The Backend Server and Central Lookup Repository are are hosted on one VM. This VM is used only for the purpose of hosting this server. When the backend server receives a request, it will check the central lookup repository for information needed to connect to the correct postgres server, including the ip address, whether the postgres server is primary or sandby, and its availability. When the backend server found the information needed, it will then connect to the appropriate postgres server and sends appropriate commmands as requested. 
 
-The Postgres Servers are always created in pairs on 2 separate VMs, with one being parimary and the other being the standby. When a postgres servers receives a command from the backend server, the command will be automatically replicated to its standby server. On every VM that runs a postgres server, there is also a poller script that will call the Central Lookup API on a schedule to update the postgres server's inforamtion to the Central Lookup Repository. In the scenario when the primary postgres server fails, the standby postgres server will automatically become the primary, and the poller script will update this information to the Central Lookup Repository. 
+The Postgres Servers are always created in pairs on 2 separate VMs, with one being parimary and the other being the standby. When a postgres server receives a command from the backend server, the command will be automatically replicated to its standby server. On every VM that runs a postgres server, there is also a poller script that will call the Central Lookup API on a schedule to update the postgres server's inforamtion to the Central Lookup Repository. In the scenario when the primary postgres server fails, the standby postgres server will automatically become the primary, and the poller script will update this information to the Central Lookup Repository. 
 
 
 ## Acceptance criteria:
@@ -80,11 +85,19 @@ The stretch goals if time permits.
 
 ## Developer Guide:
 
-There are 4 components in this project, the frontend, the backend server, the central repository and the configuration of postgres server. In the following sections we will explain the steps needed to configure and run each component.
+In the following sections we will explain the steps needed to set up each of the 4 main components of this project in order:
+
+1. the configuration of postgres server (for auto replication and failover)
+2. the backend server
+3. the central repository and the poller script 
+4. the web interface
 
 ### Configuration of postgres server
 
-* First step of running this project is to set up the primary and secondary postgres servers on two different VMs:
+First step of setting up this project is to install and configure the primary and standby postgres servers on two different VMs (We are using Centos 8 OS and PostgreSQL version 13):
+1. Step 1 - 4 go through the installation of Postgres server
+2. Step 5 -14 go through the configuration of auto repliaction and failover. 
+3. Configuration of keepalived 
 
 #### Step 1: Install PostgreSQL 13 on CentOS 8 on both servers
 
@@ -390,7 +403,7 @@ vrrp_instance VI_1 {
 
 ### Backend Server, Central Repository and Poller Scipt
 
-Please see the code and set up instructions of the backend server and the central repository in(https://github.com/amadgi/postgres_server)
+Please see the code and set up instructions of the backend server, the central repository and the poller script via(https://github.com/amadgi/postgres_server)
 
 ### Frontend 
 
