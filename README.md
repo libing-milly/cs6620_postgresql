@@ -1,9 +1,9 @@
-# PostgreSQL as a (containerized) service
+# PostgreSQL as a service
 
 
 ## Vision and Goals Of The Project:
 
-PostgreSQL is an object-relational database system that is robust and reliable. The vision of this project is to build a fault-tolerant, containerized PostgreSQL as a service solution.
+PostgreSQL is an object-relational database system that is robust and reliable. The vision of this project is to build a fault-tolerant PostgreSQL as a service solution.
 
 The key goals of this project include:
  
@@ -12,12 +12,13 @@ The key goals of this project include:
 
 ## Users/Personas Of The Project:
 
+Database Users
 
-| Database Users | 
-|----------------|
-| 1. As a database user, I want to store my data on a remote server that is fault tolerant, so that it is easy to scale up and down, and if one server is down, my data will not be lost.
-| 2. As a database user, I want to be able to conveniently manage my database through a website, including: create a new database, requesting access to existing database and deleting a database etc. 
-| 3. As a database user, I want to be able to monitor my database usage and conveniently have a report generated for me about the various metrics of my databases. | 
+1. As a database user, I want to store my data on a remote server that is fault tolerant, so that it is easy to scale up and down, and if one server is down, my data will not be lost.
+
+2. As a database user, I want to be able to conveniently manage my database through a website, including: create a new database, requesting access to existing database and deleting a database etc. 
+
+3. As a database user, I want to be able to monitor my database usage and conveniently have a report generated for me about the various metrics of my databases.
 
 
 ## Scope and Features Of The Project:
@@ -52,7 +53,7 @@ We envision the final structure to be as given below.
 
 [figure 1]: https://github.com/libing-milly/cs6620_postgresql/blob/main/diagram_final.png "Logo Title Text 2"
 
-Figure 1 presents the conceptual design we have for PGSQL as a Service (PGSQLaaS) system. There are mainly 4 componenets: 
+The above diagram presents the conceptual design we have for PGSQL as a Service (PGSQLaaS) system. There are mainly 4 componenets: 
 * the React web application; 
 * the Backend Server that handles database CRUD operation; 
 * the Central Lookup Repository that maintains information needed to connect to a Postgres Server; 
