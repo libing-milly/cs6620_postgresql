@@ -9,17 +9,15 @@ The key goals of this project include:
  
 * Building various APIs that can create, delete and modify PostgreSQL databases that are stored on various containers. 
 * Developing websites for the users to easily monitor and manage their databases through the APIs we built. 
-* Developing websites for the system administrator to manage and view the meta-data of the PostgreSQL instances. 
 
 ## Users/Personas Of The Project:
 
-There are 2 types of user roles of this project: the user of the databases, and the system administrator. 
 
-| Database Users | System Administrator |
-|----------------|----------------------|
-| 1. As a database user, I want to store my data on a remote server that is fault tolerant, so that it is easy to scale up and down, and if one server is down, my data will not be lost.| 1. As a system administrator, I want to be able to create or delete a PGSQL instance if I need to.|
-| 2. As a database user, I want to be able to conveniently manage my database through a website, including: changing my password, changing the capacity of a database, deleting a database etc. | 2. As a system administrator, I want to be able to read the real-time usage of all the PGSQL instances on the virtual machines, so that I can have a better understanding of the utilization of all the PGSQL instances.|
-| 3. As a database user, I want to be able to monitor my database usage and conveniently have a report generated for me about the various metrics of my databases. | 3. As a system administrator, I want to be able to conveniently view the statistics or meta data of the PGSQL instances in the system.|
+| Database Users | 
+|----------------|
+| 1. As a database user, I want to store my data on a remote server that is fault tolerant, so that it is easy to scale up and down, and if one server is down, my data will not be lost.
+| 2. As a database user, I want to be able to conveniently manage my database through a website, including: create a new database, requesting access to existing database and deleting a database etc. 
+| 3. As a database user, I want to be able to monitor my database usage and conveniently have a report generated for me about the various metrics of my databases. | 
 
 
 ## Scope and Features Of The Project:
@@ -29,37 +27,46 @@ The project covers the build and deployment of a Web Application with an API imp
 * Create a Web-Application that the user will be able to interact with and perform various operations.
 * Creation of various APIs for the purpose of :
 * Creation of new databases on the existing PostgreSQL instances. This should also create a backup database that shadows the primary database on another PostgreSQL instance.
-* Delete existing PostgreSQL database instances
-* List existing PostgreSQL instances.
-* Get PostgreSQL instance information.
-* Change a PostgreSQL Instance's Settings.
-* List databases running on a specific PostgreSQL instance.
+* Delete existing PostgreSQL database.
 * Get information about a PostgreSQL database.
-* Create a database on an existing instance.
 * Change settings of an existing database. 
-* Change parameters of the existing databases
-* Generate reporting metrics regarding the resource utilization, database health and database usage.
-
-Stretch Goals (to be implemented if time permits)
-
-* Expand the API service to function across multiple clouds (e.g. a private OpenStack cloud and Google Cloud)
-* Build a service that can run PostgreSQL VM instances as well as container instances. 
+* Generate reporting metrics regarding the database health and database usage.
 
 
 ## Solution Concept:
 
-The system will consist of a Web Application that will be used by the user and the corresponding API logic layer will be responsible for creating the database instances as well as getting the data requested by the user. Initially, the entire project will be done on an OpenStack based Cloud and then later can be expanded to accommodate other private clouds. The technology stack that will be used for implementation has not yet been finalized, however, we envision the final structure to be as given below.
+The system will consist of a Web Application that will be used by the user and the corresponding API logic layer will be responsible for creating the database instances as well as getting the data requested by the user. Initially, the entire project will be done on an OpenStack based Cloud and then later can be expanded to accommodate other private clouds. 
+
+### Technology Used
+The technology stack that we used for implementation are as follows:
+* Frontend: React.js
+* Backend: Flask
+* Auto Postgres Fail Over Management Tool: Repmgr, Keepalived
+* API Testing: Swagger API
+
+
+### Design
+We envision the final structure to be as given below.
 
 ![alt text][figure 1]
 
-[figure 1]: https://github.com/libing-milly/cs6620_postgresql/blob/main/diagram.png "Logo Title Text 2"
+[figure 1]: https://github.com/libing-milly/cs6620_postgresql/blob/main/diagram_final.png "Logo Title Text 2"
 
-Figure 1 presents the conceptual design we have for PGSQL as a Service (PGSQLaaS) system. In the figure, the Web service and API solution we will build is running at the bottom two boxes and the upper side of the picture represents the PGSQL instances that are hosting the user databases. As an example, the primary DB1 database (DB1-P) lives on VM1 and a secondary replica of DB1 lives on VM2 (DB1-S). This way, if the VM1 goes down the DB1 data is still available in the PGSQL instance running on VM2. Users of PGSQLaaS interact with it either via the Web interfaces served from the Apache web servers or via API’s exposed on API VM1 and API VM2.
+Figure 1 presents the conceptual design we have for PGSQL as a Service (PGSQLaaS) system. There are mainly 4 componenets: 
+* the React web application; 
+* the Backend Server that handles database CRUD operation; 
+* the Central Lookup Repository that maintains information needed to connect to a Postgres Server; 
+* the Postgres Servers along with a poller script for updating server information to the Central Lookup Server.
 
+The user can either calls the APIs directly or through the web application we developed. When a user trigger an API call through the web application, the web application will call the backend server through API. 
+
+The Backend Server and Central Lookup Repository are are hosted on one VM. This VM is used only for the purpose of hosting this server. When the backend server receives a request, it will check the central lookup repository for information needed to connect to the correct postgres server, including the ip address, whether the postgres server is primary or sandby, and its availability. When the backend server found the information needed, it will then connect to the appropriate postgres server and sends appropriate commmands as requested. 
+
+The Postgres Servers are always created in pairs on 2 separate VMs, with one being parimary and the other being the standby. When a postgres servers receives a command from the backend server, the command will be automatically replicated to its standby server. On every VM that runs a postgres server, there is also a poller script that will call the Central Lookup API on a schedule to update the postgres server's inforamtion to the Central Lookup Repository. In the scenario when the primary postgres server fails, the standby postgres server will automatically become the primary, and the poller script will update this information to the Central Lookup Repository. 
 
 
 ## Acceptance criteria:
-*  Our web application supports basic functions such as creating, deleting, listing, and updating a PostgreSQL and existing database, for both the database user and the system administrator.
+*  Our web application supports basic functions such as creating, deleting and updating a Postgres database, in a fault-tolerent mannner.
 
 ## Release Planning:
 
@@ -67,7 +74,6 @@ We will attempt to deliver our project in the following stages:
 
 1. A simple website and the corresponding APIs for the user to create and delete a PostgreSQL database on a container.
 2. A more comprehensive website with functions including viewing the meta information on current databases, updating the parameters of databases.
-3. A website and the corresponding APIs for the system administrator to monitor the state of the PostgreSQL instances.
 The stretch goals if time permits.
 
 
@@ -273,6 +279,7 @@ Check the failing primary server status and our standby server is running as a p
 To check more informantion on the document of repmgr(https://repmgr.org/docs/current/index.html)
 
 
+### Configuration of Keepalived
 
 * So far we have done the setting of primary and standby servers configuration now. But we have to set up the Keepalived's configuration for failing-over an IP address from one machine to another before we move to the next stage. Here are steps for configurating the Keepalived:
 
@@ -380,11 +387,17 @@ vrrp_instance VI_1 {
 
 `ip -brief address show`
 
-### Backend Server and Central Repository
+### Backend Server, Central Repository and Poller Scipt
 
 Please see the code and set up instructions of the backend server and the central repository in(https://github.com/amadgi/postgres_server)
 
-### Running Frontend Locally
+### Frontend 
+
+An example of the deployed frontend can be accessed through (http://postgresql-as-a-service.herokuapp.com/)
+
+#### Running Frontend Locally
 
 To run the frontend locally, Create a file named `.env` in the root directory with the line `REACT_APP_API_BASE=`, followed with the address of where your server is deployed, for example `REACT_APP_API_BASE='http://localhost:8080'`.
 After the `.env` file is created, run the `npm start` command(you will need to run the `npm install` the very first time). Moments later, a browser will automatically open with the frontend running on it.
+
+
