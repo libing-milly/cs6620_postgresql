@@ -56,7 +56,7 @@ We envision the final structure to be as given below.
 
 ![alt text][figure 1]
 
-[figure 1]: https://github.com/libing-milly/cs6620_postgresql/blob/main/diagram_final.png "Logo Title Text 2"
+[figure 1]: https://github.com/libing-milly/cs6620_postgresql/blob/main/final_diagram.png "Logo Title Text 2"
 
 The above diagram presents the conceptual design we have for PGSQL as a Service (PGSQLaaS) system. There are mainly 4 componenets: 
 * the React web application; 
