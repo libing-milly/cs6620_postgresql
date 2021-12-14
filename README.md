@@ -47,7 +47,7 @@ The technology stack that we used for implementation are as follows:
 * Frontend: React.js
 * Backend: Flask
 * PostgreSQL Database Adapter: Psycopg
-* Auto Postgres Fail Over Management Tool: Repmgr, Keepalived
+* Auto Postgres Fail Over Management Tool: Repmgr, repmgrd, Keepalived
 * API Testing: Swagger API
 
 
@@ -87,10 +87,15 @@ The stretch goals if time permits.
 
 In the following sections we will explain the steps needed to set up each of the 4 main components of this project in order:
 
-1. the configuration of postgres server (for auto replication and failover)
-2. the backend server
-3. the central repository and the poller script 
+1. the backend server
+2. the central repository and the poller script 
+3. the configuration of postgres server (for auto replication and failover)
 4. the web interface
+
+### Backend Server, Central Repository and Poller Scipt
+
+Please see the code and set up instructions of the backend server, the central repository and the poller script via(https://github.com/amadgi/postgres_server) under the "Developer Guide" section.
+
 
 ### Configuration of postgres server
 
@@ -401,9 +406,6 @@ vrrp_instance VI_1 {
 
 `ip -brief address show`
 
-### Backend Server, Central Repository and Poller Scipt
-
-Please see the code and set up instructions of the backend server, the central repository and the poller script via(https://github.com/amadgi/postgres_server)
 
 ### Frontend 
 
@@ -411,7 +413,7 @@ An example of the deployed frontend can be accessed through (http://postgresql-a
 
 #### Running Frontend Locally
 
-To run the frontend locally, Create a file named `.env` in the root directory with the line `REACT_APP_API_BASE=`, followed with the address of where your server is deployed, for example `REACT_APP_API_BASE='http://localhost:8080'`.
+To run the frontend locally, Create a file named `.env` in the root directory with the line `REACT_APP_API_BASE=`, followed with the address of where your server is deployed, for example `REACT_APP_API_BASE='http://localhost:5000'`.
 After the `.env` file is created, run the `npm start` command(you will need to run the `npm install` the very first time). Moments later, a browser will automatically open with the frontend running on it.
 
 
